@@ -1,0 +1,10 @@
+# gLogger
+# initially created by Martin Matysiak (mail@martin-matysiak.de)
+
+This is the source code for a gps logging device made by me. It's based on a AVR
+ATmega32 MCU and writes data from a SkyTraq ST22 GPS module to a micro sd card.
+
+The instructions for building such a device (in German, though) can be found
+here:
+
+http://www.mikrocontroller.net/articles/GPS_Logger_Mini 

@@ -1,0 +1,11 @@
+Version 1.0 (19. June 2010):
+* Initial Release
+
+Version 1.1 (08. January 2011):
+* Bugfix: nofs_init scans the whole SD-card for 0x03 (ETX) instead of only
+  the first sector -> Existing data won't be overwritten anymore (thanks to
+  Ralf Fischer for detecting and solving the problem!)
+
+Version 1.2 (18. July 2011):
+* Bugfix: It seems that ETX wasn't written correctly. Because of this, the
+  logger couldn't find a place to continue writing. This is fixed now.
