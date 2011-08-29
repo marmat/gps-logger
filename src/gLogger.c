@@ -2,10 +2,10 @@
   ########## gLogger Mini ##########
     
 	Von Martin Matysiak
-		mail@k621.de
-		www.k621.de
+		mail@martin-matysiak.de
+		www.martin-matysiak.de
 
-	Version 1.20
+	Version 1.30
 
   ########## Changes: ##########
 
@@ -17,6 +17,13 @@
   Version 1.2 (18.07.2011):
     * Bugfix: It seems that ETX wasn't written correctly. Because of this, the
       logger couldn't find a place to continue writing. This is fixed now
+      
+  Version 1.3 (29.08.2011):
+    * Bugfix: GPS-Module was set to 2Hz despite of comment saying it was 1Hz,
+      now it's _really_ set to 1Hz
+    * Bugfix: The UART library produced regularly buffer overruns which weren't
+      detected due to the 2Hz bug. This won't happen anymore (thanks to Bastian
+      Wegener!)
 
   ########## Änderungen: ##########
 
@@ -30,6 +37,13 @@
     * Bugfix: Anscheinend wurde das ETX byte nicht ordentlich geschrieben. Des-
       wegen konnte der Logger keine Position zum Fortsetzen der Aufzeichnung
       finden. Das ist nun behoben
+      
+  Version 1.3 (29.08.2011):
+    * Bugfix: Das GPS-Modul war, entgegen des Kommentars, auf 2Hz gestellt. Nun
+      ist es _wirklich_ auf 1Hz gestellt.
+    * Bugfix: Die UART Bibliothek produzierte regelmäßig Buffer Überläufe, die
+      wegen des 2Hz-Bugs nicht/kaum bemerkt wurden. Dies ist nun ebenfalls be-
+      hoben (vielen dank an Bastian Wegener!)
   
   ########## Licensing ##########
 

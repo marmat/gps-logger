@@ -25,20 +25,25 @@ static volatile uint8_t uart_outputBuf0Read = 0;
 static volatile uint8_t uart_outputBuf0Write = 0;
 
 void uart_init(uint8_t pConfig, uint16_t pUbr) {
-    //Baudrate schreiben (High muss zuerst gesetzt werden!)
-    UBRR0H = (uint8_t)(pUbr >> 8);
-    UBRR0L = (uint8_t)pUbr;
+  //Baudrate schreiben (High muss zuerst gesetzt werden!)
+  UBRR0H = (uint8_t)(pUbr >> 8);
+  UBRR0L = (uint8_t)pUbr;
 
-    //Port und Interrupt aktivieren
-    UCSR0B |= (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0);
+  //Port und Interrupt aktivieren
+  UCSR0B |= (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0);
 
-    //Frame-Konfiguration schreiben
-    UCSR0C = pConfig;
+  //Frame-Konfiguration schreiben
+  UCSR0C = pConfig;
 }
 
 unsigned char uart_getChar() {
   if (uart_inputBuf0Read != uart_inputBuf0Write) {
-    return uart_inputBuf0[++uart_inputBuf0Read];
+    // Increment reading pointer while catching a possible array overflow
+    if (++uart_inputBuf0Read >= UART_BUFFER_SIZE) {
+      uart_inputBuf0Read = 0;
+    }
+  
+    return uart_inputBuf0[uart_inputBuf0Read];
   } 
 
   return '\0';
@@ -68,11 +73,25 @@ uint8_t uart_getString(char* pResult, uint8_t pResultSize) {
 void uart_setChar(char pData) {
   //Byte in den Sendebuffer schreiben, Sendeinterrupt aktivieren
   //Schreibzeiger um Eins vorrücken, wenn dann auf Lesezeiger liegt, warten
-  while ((uart_outputBuf0Write+1) == uart_outputBuf0Read) {
-    //Warten
+  if (uart_outputBuf0Write+1 >= UART_BUFFER_SIZE) {
+    // writing pointer is at the end of the buffer array, next index will be 0  
+    while (uart_outputBuf0Read == 0) {
+      // wait, buffer is full
+    }
+    
+    uart_outputBuf0Write = 0;
+  } else {
+    while (uart_outputBuf0Write+1 == uart_outputBuf0Read) {
+      // wait, buffer is full
+    }
+    
+    uart_outputBuf0Write++;
   }
-  uart_outputBuf0[++uart_outputBuf0Write] = pData;
-  //Interrupt aktivieren
+
+  // write character into buffer   
+  uart_outputBuf0[uart_outputBuf0Write] = pData;
+
+  // activate interrupt
   UCSR0B |= (1 << UDRIE0); 
 }
 
@@ -89,19 +108,34 @@ void uart_clearBuf() {
 
 //Interrupt-Abarbeitung
 ISR(USART_RX_vect) {
-  //Eingehendes Byte in den Buffer schreiben
-  if(uart_inputBuf0Write+1 != uart_inputBuf0Read) {
-    uart_inputBuf0[++uart_inputBuf0Write] = UDR0;
+  if(uart_inputBuf0Write+1 >= UART_BUFFER_SIZE) {
+    // writing pointer is at the end of the buffer array, next index will be 0
+    if(uart_inputBuf0Read != 0) {
+        uart_inputBuf0Write = 0;
+        uart_inputBuf0[uart_inputBuf0Write] = UDR0;
+        return;
+    }
   } else {
-    char garbage;
-    garbage = UDR0; //Byte verwerfen um Buffer zu räumen  
+    if(uart_inputBuf0Write+1 != uart_inputBuf0Read) {
+      uart_inputBuf0[++uart_inputBuf0Write] = UDR0;
+      return;
+    }
   }
+  
+  // if the method didn't return, it means that the buffer is full
+  // discard the byte in order to prevent a blocked UDR register
+  char garbage;
+  garbage = UDR0;
 }
 
 ISR(USART_UDRE_vect) {
   //Solange nächstes Byte schreiben, bis Lese == Schreibposition
   if (uart_outputBuf0Read != uart_outputBuf0Write) {
-    UDR0 = uart_outputBuf0[++uart_outputBuf0Read];
+    if (++uart_outputBuf0Read >= UART_BUFFER_SIZE) {
+      uart_outputBuf0Read = 0;
+    }
+  
+    UDR0 = uart_outputBuf0[uart_outputBuf0Read];
   } else {
     //Buffer abgearbeitet, Interrupt deaktivieren
     UCSR0B &= ~(1 << UDRIE0);
