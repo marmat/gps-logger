@@ -40,7 +40,7 @@ uint8_t gps_init() {
   _delay_ms(50);
 
   unsigned char rate[2] = {
-    0x02, //1 Hertz
+    0x01, //1 Hertz
     0x00}; //In SRAM
 
   gps_setParam(GPS_SET_UPDATE_RATE, rate, 2);
