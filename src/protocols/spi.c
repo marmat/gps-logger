@@ -39,11 +39,8 @@ uint8_t spi_init() {
   // SPI Master Mode, ohne Interrupts (Blocking mode)
   // MSB Zuerst
   // CPOL Mode 0 (CPOL=0, CPHA=0)
-  // F_SPI = F_CPU / 4
-  SPCR = (1 << SPE) | (1 << MSTR);
-
-  // Double SPI Frequency (that makes F_SPI = F_CPU / 2)
-  SPSR |= (1<<SPI2X); 
+  // F_SPI = F_CPU / 128
+  SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1) | (1 << SPR0);
 
   return TRUE;
 }
@@ -67,4 +64,12 @@ uint8_t spi_readByte() {
   }
     
   return SPDR;
+}
+
+void spi_highspeed() {
+  // Set speed in SPI Control Register to F_CPU / 4
+  SPCR &=~ (1 << SPR1) | (1 << SPR0);
+
+  // Double SPI Frequency (that makes F_SPI = F_CPU / 2)
+  SPSR |= (1<<SPI2X); 
 }

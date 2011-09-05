@@ -52,6 +52,10 @@ uint8_t sdmmc_init() {
     }
 
     CLEAR_CS();
+
+    // Switch to higher SPI frequency once initialized
+    spi_highspeed();
+
     return TRUE;
   }
 
