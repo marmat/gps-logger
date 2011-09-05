@@ -9,3 +9,10 @@ Version 1.1 (08. January 2011):
 Version 1.2 (18. July 2011):
 * Bugfix: It seems that ETX wasn't written correctly. Because of this, the
   logger couldn't find a place to continue writing. This is fixed now.
+  
+Version 1.3 (29. August 2011):
+* Bugfix: GPS-Module was set to 2Hz despite of comment saying it was 1Hz,
+  now it's _really_ set to 1Hz
+* Bugfix: The UART library produced regularly buffer overruns which weren't
+  detected due to the 2Hz bug. This won't happen anymore (thanks to Bastian
+  Wegener!)
