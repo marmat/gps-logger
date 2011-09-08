@@ -55,6 +55,32 @@
 #include "modules/nofs.h"
 #include "modules/gps.h"
 
+/**
+ * \brief Indicates an error using the LED. Loops forever
+ *
+ * Once the error method is called, there is no way back. The code influences
+ * the flashing sequence of the LED. In general, the LED flashes code times with
+ * a break of 100ms between each flash, then the LED is 500ms off and then 
+ * the whole sequence repeats itself.
+ *
+ * \param code The error code which shall be displayed
+ */
+void error(uint8_t code) {
+    LEDCODE_OFF();
+    
+    while (TRUE) {
+        for (uint8_t i = 0; i <= code; i++) {
+            LEDCODE_ON();
+            _delay_ms(100);
+            LEDCODE_OFF();
+            _delay_ms(100);
+        }
+        
+        _delay_ms(250);
+        _delay_ms(150);
+    }
+}
+
 int main (void) {
 
 	// Interrupts global aktivieren
@@ -69,13 +95,18 @@ int main (void) {
 
   _delay_s(1);
 
-	// Module initalisieren
-  if (!(nofs_init() && gps_init())) {
-    while(1) {
-      _delay_ms(100);
-      LEDCODE_BLINK();    
+    // Initialize each module seperately in order to display a better error code
+    while (!sdmmc_init()) {
+        error(1);
     }
-  }
+    
+    if (!nofs_init()) {
+        error(2);
+    }
+    
+    if (!gps_init()) {
+        error(3);
+    }
 
   LEDCODE_OFF();
 
