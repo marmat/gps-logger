@@ -31,8 +31,21 @@
   #define GPS_SET_POWER 0x0C
   #define GPS_SET_UPDATE_RATE 0x0E
   #define GPS_SET_1PPS 0x3E
+   
+  // Indicators if NMEA Message is valid or invalid (validity differs for each Message type)
+  #define GPS_NMEA_VALID 0x01
+  #define GPS_NMEA_INVALID 0x00
 
-  ///BAUD-Rate für die serielle Schnittstelle zum GPS-Modul
+  // Possible NMEA-Messages that may be returned
+  #define GPS_NMEA_GGA 0x02
+  #define GPS_NMEA_RMC 0x04
+  /// others not used yet
+  #define GPS_NMEA_UNKOWN 0x80
+  
+  /// A bitmask to extract the message type from a getNMEA return value
+  #define GPS_NMEA_TYPEMASK 0xFE
+
+  /// BAUD-Rate für die serielle Schnittstelle zum GPS-Modul
   #define GPS_BAUDRATE 9600UL
 
   ///Initalisiert das GPS-Modul
@@ -48,11 +61,12 @@
   unsigned char gps_setParam(unsigned char pCommand, unsigned char* pData, uint16_t pLength);
 
   /**
-    Wartet auf einen vollständiges NMEA-Kommando und schreibt dieses in den Buffer
-
-    \param pOutput Der Buffer, in den das NMEA-Kommando geschrieben werden soll
-    \param pMaxLenght Die Länge des Buffers
-    \return TRUE wenn Positionsmeldung einen Fix hatte, ansonsten FALSE
+    \brief Writes an NMEA-String into the given output buffer and returns its type
+    
+    \param pOutput The buffer in which the NMEA string shall be written
+    \param pMaxLength The buffer's maximal length
+    \return A byte composed of the message type (bits 1-7) and a bit indicating
+    if the message is valid or not (bit 0). 
   */
-  uint8_t gps_getNmeaSentence(char* pOutput, uint8_t pMaxLength);
+  uint8_t gps_getNMEA(char* pOutput, uint8_t pMaxLength);
 #endif

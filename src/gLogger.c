@@ -114,7 +114,7 @@ int main (void) {
 
   while(1) {
     // Geschrieben wird nur, wenn NMEA-Kommando einen Fix hatte
-    if(gps_getNmeaSentence(nmeaBuf, 128)) {
+    if(gps_getNMEA(nmeaBuf, 128)) {
       nofs_writeString(nmeaBuf);
     }
 
