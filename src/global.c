@@ -19,3 +19,14 @@ void _delay_s(uint8_t pSeconds) {
     _delay_ms(250);
   }
 }
+
+uint8_t strStartsWith(const char *pString, char *pPattern) {
+    uint8_t i = 0;
+    while(pPattern[i]) {
+        if(!(pString[i] == pPattern[i])) {
+            return FALSE;
+        }
+        i++;
+    }
+    return TRUE;
+}

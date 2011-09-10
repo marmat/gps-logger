@@ -47,4 +47,16 @@
   #include <util/delay.h>
 
   void _delay_s(uint8_t pSeconds);
+  
+    /**
+     * \brief Checks if the given string starts with the given pattern
+     *
+     * Both Strings have to be NULL-Terminated! pString will not be modified
+     * in any way (in fact, it can't because of the const declaration).
+     *
+     * \param pString The string which should be checked
+     * \param pPattern The pattern for which will be checked in pString
+     * \return TRUE if the string starts with the pattern, FALSE otherwise
+     */
+    uint8_t strStartsWith(const char *pString, char *pPattern);
  #endif
