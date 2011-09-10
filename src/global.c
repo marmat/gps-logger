@@ -30,3 +30,24 @@ uint8_t strStartsWith(const char *pString, char *pPattern) {
     }
     return TRUE;
 }
+
+uint8_t hexCharToInt(char pChar) {
+    // If character is lowercase (i.e. ASCII value greater or equal 97), "convert"
+    // it to uppercase
+    if (pChar >= 97) {
+        pChar -= 32;
+    }
+    
+    // If character is a letter (i.e. ASCII value greater or equal 65), substract
+    // a certain amount so that 'A' would be mapped to 10
+    if (pChar >= 65) {
+        pChar -= 55;
+        return pChar < 16 ? pChar : 0;
+    } else {
+        // Otherwise map '0' to 0
+        pChar -= 48;
+        return pChar < 10 ? pChar : 0;
+    }
+        
+    return 0;
+}
