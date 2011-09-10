@@ -95,6 +95,16 @@ unsigned char gps_setParam(unsigned char pCommand, unsigned char* pData, uint16_
   return GPS_ACK;
 }
 
+uint8_t gps_isValidGGA(const char* pCommand, uint8_t pCommaCount) {
+    // TODO //
+    return GPS_NMEA_INVALID;
+}
+
+uint8_t gps_isValidRMC(const char* pCommand, uint8_t pCommaCount) {
+    // TODO //
+    return GPS_NMEA_INVALID;
+}
+
 uint8_t gps_getNMEA(char* pOutput, uint8_t pMaxLength) {
     // A dollar sign indicates the start of a NMEA sentence
     while(uart_getChar() != '$') {
@@ -129,7 +139,11 @@ uint8_t gps_getNMEA(char* pOutput, uint8_t pMaxLength) {
     pOutput[i] = 0;
 
     // Perform some validity checks and determine message type
-    // TODO //
+    if (strStartsWith(pOutput, "$GPGGA")) {
+        return GPS_NMEA_GGA | gps_isValidGGA(pOutput, commaCount);
+    } else if (strStartsWith(pOutput, "$GPRMC")) {
+        return GPS_NMEA_RMC | gps_isValidRMC(pOutput, commaCount);
+    }
 
     // If we got here, no valid message pattern could be matched =(
     return GPS_NMEA_UNKOWN;

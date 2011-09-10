@@ -59,6 +59,32 @@
     \return GPS_ACK bei Erfolg, ansonsten GPS_NACk
   */
   unsigned char gps_setParam(unsigned char pCommand, unsigned char* pData, uint16_t pLength);
+  
+  /**
+   * \brief Checks if the given message is a valid $GPGGA sentence
+   * 
+   * In this case, validity incorporates a correct checksum, a correct comma
+   * count and a valid GPS fix.
+   *
+   * \param pCommand The NMEA-sentence
+   * \param pCommaCount The number of commas in the sentence (tbd if necessary)
+   * \return GPS_VALID if sentence is a valid $GPGGA sentence, GPS_INVALID
+   * otherwise
+   */
+  uint8_t gps_isValidGGA(const char* pCommand, uint8_t pCommaCount);
+  
+  /**
+   * \brief Checks if the given message is a valid $GPRMC sentence
+   * 
+   * In this case, validity incorporates a correct checksum, a correct comma
+   * count and a valid GPS fix.
+   *
+   * \param pCommand The NMEA-sentence
+   * \param pCommaCount The number of commas in the sentence (tbd if necessary)
+   * \return GPS_VALID if sentence is a valid $GPRMC sentence, GPS_INVALID
+   * otherwise
+   */
+  uint8_t gps_isValidRMC(const char* pCommand, uint8_t pCommaCount);
 
   /**
     \brief Writes an NMEA-String into the given output buffer and returns its type
