@@ -37,10 +37,15 @@
   #define GPS_NMEA_INVALID 0x00
 
   // Possible NMEA-Messages that may be returned
-  #define GPS_NMEA_GGA 0x02
-  #define GPS_NMEA_RMC 0x04
-  /// others not used yet
-  #define GPS_NMEA_UNKOWN 0x80
+  #define GPS_NMEA_GGA 0b00000010 // Note: bit 0 can't be used, is an indicator
+  #define GPS_NMEA_GSA 0b00000100 // for validity of the message
+  #define GPS_NMEA_GSV 0b00001000
+  #define GPS_NMEA_GLL 0b00010000
+  #define GPS_NMEA_RMC 0b00100000
+  #define GPS_NMEA_VTG 0b01000000
+  #define GPS_NMEA_ZDA 0b10000000
+
+  #define GPS_NMEA_UNKOWN 0
   
   /// A bitmask to extract the message type from a getNMEA return value
   #define GPS_NMEA_TYPEMASK 0xFE
@@ -48,8 +53,24 @@
   /// BAUD-Rate für die serielle Schnittstelle zum GPS-Modul
   #define GPS_BAUDRATE 9600UL
 
-  ///Initalisiert das GPS-Modul
-  uint8_t gps_init();
+    /**
+     * \brief Initializes the GPS-module
+     *
+     * The parameters can be used to configure the output produced by the GPS.
+     * Please note that certain limitations exist for the parameters values.
+     *
+     * \param pFrequency The frequency (in Hertz) in which NMEA-sentences should
+     * be returned. The module supports only a value of the set {1,2,4,5,8,10}.
+     * Only the values {1,2} are supported by the gLogger-Firmware right now!
+     * Higher frequencies may or may not work.
+     * \param pMessages A bitset containing the messages which should be
+     * returned in each message block. Multiple messages can be selected by 
+     * using the OR-operator on the constant values. Possible constant values
+     * are {GPS_NMEA_GGA, GPS_NMEA_RMC, GPS_NMEA_GSA, GPS_NMEA_GSV,
+     * GPS_NMEA_GLL, GPS_NMEA_VTG, GPS_NMEA_ZDA}.
+     * \return TRUE if initialization succeeded, FALSE otherwise
+     */
+    uint8_t gps_init(uint8_t pFrequency, uint8_t pMessages);
 
   /** 
     Setzt einen Parameter des GPS-Moduls mit den gegebenen Daten
@@ -92,7 +113,8 @@
     \param pOutput The buffer in which the NMEA string shall be written
     \param pMaxLength The buffer's maximal length
     \return A byte composed of the message type (bits 1-7) and a bit indicating
-    if the message is valid or not (bit 0). 
+    if the message is valid or not (bit 0). Note: currently the method returns
+    GPS_NMEA_UNKNOWN for everything other than $GPGGA or $GPRMC messages
   */
   uint8_t gps_getNMEA(char* pOutput, uint8_t pMaxLength);
 #endif

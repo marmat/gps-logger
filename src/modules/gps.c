@@ -16,7 +16,7 @@
 
 #include "modules/gps.h"
 
-uint8_t gps_init() {
+uint8_t gps_init(uint8_t pFrequency, uint8_t pMessages) {
 
   //UART-Schnittstelle initalisieren
   uart_init(UART_CONFIGURE(UART_ASYNC, UART_8BIT, UART_1STOP, UART_NOPAR), 
@@ -26,21 +26,21 @@ uint8_t gps_init() {
 
   //Grundeinstellungen vornehmen
   unsigned char commands[8] = {
-    0x01, // GGA 1Hz
-    0x00, // no GSA
-    0x00, // no GSV
-    0x00, // no GLL
-    0x01, // RMC 1Hz
-    0x00, // no VTG
-    0x00, // no ZDA
-    0x00}; // in SRAM&FLASH
+    pMessages & GPS_NMEA_GGA ? 1 : 0, // GGA 1Hz
+    pMessages & GPS_NMEA_GSA ? 1 : 0, // no GSA
+    pMessages & GPS_NMEA_GSV ? 1 : 0, // no GSV
+    pMessages & GPS_NMEA_GLL ? 1 : 0, // no GLL
+    pMessages & GPS_NMEA_RMC ? 1 : 0, // RMC 1Hz
+    pMessages & GPS_NMEA_VTG ? 1 : 0, // no VTG
+    pMessages & GPS_NMEA_ZDA ? 1 : 0, // no ZDA
+    0x00}; // in SRAM
 
   gps_setParam(GPS_SET_NMEA, commands, 8);
 
   _delay_ms(50);
 
   unsigned char rate[2] = {
-    0x01, // 1 Hertz
+    pFrequency, // pFrequency Hertz
     0x00}; // In SRAM
 
   gps_setParam(GPS_SET_UPDATE_RATE, rate, 2);

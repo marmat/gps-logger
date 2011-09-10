@@ -104,7 +104,7 @@ int main (void) {
         error(2);
     }
     
-    if (!gps_init()) {
+    if (!gps_init(1, GPS_NMEA_GGA | GPS_NMEA_RMC)) {
         error(3);
     }
 
