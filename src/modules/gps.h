@@ -45,7 +45,7 @@
   #define GPS_NMEA_VTG 0b01000000
   #define GPS_NMEA_ZDA 0b10000000
 
-  #define GPS_NMEA_UNKOWN 0
+  #define GPS_NMEA_UNKNOWN 0
   
   /// A bitmask to extract the message type from a getNMEA return value
   #define GPS_NMEA_TYPEMASK 0xFE
@@ -81,31 +81,33 @@
   */
   unsigned char gps_setParam(unsigned char pCommand, unsigned char* pData, uint16_t pLength);
   
-  /**
-   * \brief Checks if the given message is a valid $GPGGA sentence
-   * 
-   * In this case, validity incorporates a correct checksum, a correct comma
-   * count and a valid GPS fix.
-   *
-   * \param pCommand The NMEA-sentence
-   * \param pCommaCount The number of commas in the sentence (tbd if necessary)
-   * \return GPS_VALID if sentence is a valid $GPGGA sentence, GPS_INVALID
-   * otherwise
-   */
-  uint8_t gps_isValidGGA(const char* pCommand, uint8_t pCommaCount);
-  
-  /**
-   * \brief Checks if the given message is a valid $GPRMC sentence
-   * 
-   * In this case, validity incorporates a correct checksum, a correct comma
-   * count and a valid GPS fix.
-   *
-   * \param pCommand The NMEA-sentence
-   * \param pCommaCount The number of commas in the sentence (tbd if necessary)
-   * \return GPS_VALID if sentence is a valid $GPRMC sentence, GPS_INVALID
-   * otherwise
-   */
-  uint8_t gps_isValidRMC(const char* pCommand, uint8_t pCommaCount);
+    /**
+     * \brief Checks if the given sentence meets the criteria for a valid message
+     *
+     * This method checks several properties, some of them will only indicate if
+     * the message can be considered as "valid" or not, others will say more 
+     * generally if the given message is in a correct format.
+     *
+     * \param pSentence The sentence which shall be checked
+     * \param pMessageType The message type which is expected
+     * \param pPrefix The prefix (== message type) that the sentence is supposed
+     * to have 
+     * \param pValidityToken The index of a token (a token is delimited by commas)
+     * in which a validity information can be found. Set to 0 if no validity check
+     * should be performed. Token 1 begins after the first comma (i.e. the first
+     * data after the "$GP..." type string)
+     * \param pValidityCheck A string to which the validityToken should be compared
+     * \param pCheckEquality If TRUE, the sentence is considered valid if the 
+     * validityToken equals the validityCheck string, otherwise if they are unequal
+     * \return GPS_NMEA_UNKNOWN if the message has a corrupt format (i.e. prefix or
+     * checksum mismatch), otherwise a composition of GPS_NMEA_<TYPE> | {GPS_NMEA_
+     * VALID or GPS_NMEA_INVALID}. If pValidityToken is zero, GPS_NMEA_VALID will
+     * be returned in combination with the type as we assume that this specific
+     * message type is always valid.
+     */
+    uint8_t gps_checkNMEA(const char* pSentence, uint8_t pMessageType, 
+        char* pPrefix, uint8_t pValidityToken, char* pValidityCheck, 
+        uint8_t pCheckEquality);
 
   /**
     \brief Writes an NMEA-String into the given output buffer and returns its type
