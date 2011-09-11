@@ -1,67 +1,60 @@
 /**
-  ########## gLogger Mini ##########
-    
-	Von Martin Matysiak
-	    mail@k621.de
-      www.k621.de
-
-  Befehlsbibliothek für das SPI-Protkoll
-
-  ########## Licensing ##########
-
-  Please take a look at the LICENSE file for detailed information.
-*/
+ * \file spi.c
+ * \brief Library for SPI communication
+ * \author Martin Matysiak
+ */
 
 #include "protocols/spi.h"
 
 uint8_t spi_init() {
-  
-  // SPI-Port konfigurieren:
-  //  SCK, CS, MOSI als Ausgang
-  //  MISO als Eingang, mit aktiviertem Pull-Up
-  //  CS Standardmäßig High
+    // configure port directions
+    SPI_PORT_DIR |= (1 << SPI_SCK) | (1 << SPI_CS) | (1 << SPI_MOSI);
+    SPI_PORT_DIR &= ~(1 << SPI_MISO);
 
-  //  Portrichtungen definieren
-  SPI_PORT_DIR |= (1 << SPI_SCK) | (1 << SPI_CS) | (1 << SPI_MOSI);
-  SPI_PORT_DIR &= ~(1 << SPI_MISO);
+    // pull-up on the MISO-line
+    SPI_PORT |= (1 << SPI_MISO);
 
-  // Pull-Up auf MISO Leitung
-  SPI_PORT |= (1 << SPI_MISO);
+    CLEAR_CS();
 
-  // Chipselect löschen
-  CLEAR_CS();
-  
-  // Kurz warten
-  _delay_ms(10);
+    // wait a bit
+    _delay_ms(10);
 
-  // SPI-Register konfigurieren
+    // configure SPI register
 
-  // SPI Master Mode, ohne Interrupts (Blocking mode)
-  // MSB Zuerst
-  // CPOL Mode 0 (CPOL=0, CPHA=0)
-  // F_SPI = F_CPU / 128
-  SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1) | (1 << SPR0);
+    // SPI master mode, no interrupts (blocking mode)
+    // MSB first
+    // CPOL Mode 0 (CPOL=0, CPHA=0)
+    // F_SPI = F_CPU / 128
+    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1) | (1 << SPR0);
 
-  return TRUE;
+    return TRUE;
 }
 
 void spi_writeByte(uint8_t pByte) {
-  SPDR = pByte;
+    SPDR = pByte;
 
-  // Auf Transferergebnis warten
-  while (!(SPSR & (1 << SPIF))) {
-    // Energie verbrennen
-  }
+    // Wait for transfer to complete
+    while (!(SPSR & (1 << SPIF))) {
+        // burn energy
+    }
 }
 
 uint8_t spi_readByte() {
-  // Dummybyte "senden", damit SCK-Impulse generiert werden
-  SPDR = 0xFF;  
+    // Send dummybyte in order to generate clock signals
+    SPDR = 0xFF;  
 
-  // Auf Transferergebnis warten
-  while (!(SPSR & (1 << SPIF))) {
-    // Energie verbrennen
-  }
-    
-  return SPDR;
+    // Wait for transfer to complete
+    while (!(SPSR & (1 << SPIF))) {
+        // burn energy
+    }
+
+    return SPDR;
+}
+
+void spi_highspeed() {
+    // Set speed in SPI Control Register to F_CPU / 4
+    SPCR &=~ (1 << SPR1) | (1 << SPR0);
+
+    // Double SPI Frequency (that makes F_SPI = F_CPU / 2)
+    SPSR |= (1<<SPI2X); 
 }

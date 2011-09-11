@@ -1,36 +1,37 @@
 /**
-  ########## gLogger Mini ##########
-    
-	Von Martin Matysiak
-	    mail@k621.de
-      www.k621.de
-
-  NoFS - NoFileSystem - Eine Art, das Speichermedium im RAW-Modus
-  zu beschreiben, mit automatischer Erkennung der letzten Schreib-
-  position, um Datenverlust zu verhindern. Nach Außen sind nur
-  Schreib-Methoden verfügbar, es handelt sich also um eine Art
-  "WOM" (Write-Only-Memory).
-
-  ########## Licensing ##########
-
-  Please take a look at the LICENSE file for detailed information.
-*/
-
+ * \file nofs.h
+ * \brief Library for accessing a NoFS (NoFileSystem) on the memory card
+ * \author Martin Matysiak
+ */
 
 #ifndef NOFS_H
-  #define NOFS_H
+    #define NOFS_H
 
-  /// Die Größe des NoFS-Buffers (entspricht einer Sektorgröße)
-  #define NOFS_BUFFER_SIZE 512 
-  /// Der Buffer wird nur alle N "writeString" Befehle auf SD geschrieben, um die Zellen zu schonen
-  #define NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND 10
+    /// Size of the NoFS-Buffer (equals the block size on a memory card)
+    #define NOFS_BUFFER_SIZE 512 
+    /// The buffer will be written on the memory card only every N writeString calls
+    #define NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND 10
 
-  #include "global.h"
-  #include "modules/sdmmc.h"
-  
-  uint8_t nofs_init();
+    #include "global.h"
+    #include "modules/sdmmc.h"
 
-  uint8_t nofs_writeString(char* pString);
+    /**
+     * \brief Initializes the NoFS
+     *
+     * Please note that the memory card has to be initialized already seperately
+     * before (by calling sdmmc_init() or sth equivalent).
+     *
+     * \return TRUE on success, FALSE otherwise
+     */
+    uint8_t nofs_init();
+
+    /**
+     * \brief Appends a character string to the present data
+     * 
+     * \param pString A null-terminated character string which should be written
+     * \return TRUE on success, FALSE otherwise
+     */
+    uint8_t nofs_writeString(char* pString);
 #endif
 
 
