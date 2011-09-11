@@ -75,7 +75,7 @@ int main (void) {
     }
 
     // Write a short information string containing the firmware version (NMEA compliant)
-    nofs_writeString("$PGLGVER,1.4a2\r\n");
+    nofs_writeString("$PGLGVER,1.4\r\n");
 
     LEDCODE_OFF();
 

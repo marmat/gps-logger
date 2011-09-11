@@ -16,3 +16,16 @@ Version 1.3 (29. August 2011):
 * Bugfix: The UART library produced regularly buffer overruns which weren't
   detected due to the 2Hz bug. This won't happen anymore (thanks to Bastian
   Wegener!)
+  
+Version 1.4 (11. September 2011):
+* Improved GPS-module library. Support for all seven message types, including
+  internal validity check. Easier configuration by using parameters in the 
+  gps_init() method.
+* Added some global helper methods
+* Added a doxygen config file in order to create a documentation easily
+* Cleaned (i.e. fixed indentation etc.) and commented every part of the code
+
+Planned for Version 1.5:
+* Support for switching UART-frequency in the GPS-library in order to support
+  higher output frequencies (i.e. 4 Hz and above)
+* Improve NoFS handling

@@ -28,13 +28,11 @@
     #define UART_0 0
     #define UART_1 1
 
-    #define UART_NOERROR 0x00
-    #define UART_BUF_OVERRUN 0x02
-
+    /// Size of the input buffer in bytes
     #define UART_INPUT_BUFFER_SIZE 128
+    
+    /// Size of the output buffer in bytes
     #define UART_OUTPUT_BUFFER_SIZE 32
-
-    #define UART_BUFFER_OVERFLOW 0x00
 
     /// Macro which generates a configuration byte for the UART register
     #define UART_CONFIGURE(pMode, pBits, pStop, pParity) pMode | pBits | pStop | pParity

@@ -1,109 +1,93 @@
 /**
-  ########## gLogger Mini ##########
-    
-	Von Martin Matysiak
-	    mail@k621.de
-      www.k621.de
-
-  Methoden zum Umgang mit dem ST22 GPS-Modul von Perthold Engineering.
-  Klasse auf absolute Grundfunktionen reduziert. Datenausgabe erfolgt
-  ungeparst als ASCII-String, keine Prüfung auf Validität o.ä..
-
-  ########## Licensing ##########
-
-  Please take a look at the LICENSE file for detailed information.
-*/
+ * \file gps.c
+ * \brief Library for handling the GPS-module
+ * \author Martin Matysiak
+ */
 
 #include "modules/gps.h"
 
 uint8_t gps_init(uint8_t pFrequency, uint8_t pMessages) {
 
-  //UART-Schnittstelle initalisieren
-  uart_init(UART_CONFIGURE(UART_ASYNC, UART_8BIT, UART_1STOP, UART_NOPAR), 
+    // initializes UART interface
+    uart_init(UART_CONFIGURE(UART_ASYNC, UART_8BIT, UART_1STOP, UART_NOPAR), 
     UART_CALCULATE_BAUD(F_CPU, GPS_BAUDRATE));
 
-  _delay_s(1);
+    _delay_s(1);
 
-  //Grundeinstellungen vornehmen
-  unsigned char commands[8] = {
-    pMessages & GPS_NMEA_GGA ? 1 : 0, // GGA 1Hz
-    pMessages & GPS_NMEA_GSA ? 1 : 0, // no GSA
-    pMessages & GPS_NMEA_GSV ? 1 : 0, // no GSV
-    pMessages & GPS_NMEA_GLL ? 1 : 0, // no GLL
-    pMessages & GPS_NMEA_RMC ? 1 : 0, // RMC 1Hz
-    pMessages & GPS_NMEA_VTG ? 1 : 0, // no VTG
-    pMessages & GPS_NMEA_ZDA ? 1 : 0, // no ZDA
-    0x00}; // in SRAM
+    // perform basic configuration using the given parameters
+    unsigned char commands[8] = {
+        pMessages & GPS_NMEA_GGA ? 1 : 0,
+        pMessages & GPS_NMEA_GSA ? 1 : 0,
+        pMessages & GPS_NMEA_GSV ? 1 : 0,
+        pMessages & GPS_NMEA_GLL ? 1 : 0,
+        pMessages & GPS_NMEA_RMC ? 1 : 0,
+        pMessages & GPS_NMEA_VTG ? 1 : 0,
+        pMessages & GPS_NMEA_ZDA ? 1 : 0,
+        0x00}; // in SRAM
 
-  gps_setParam(GPS_SET_NMEA, commands, 8);
+    gps_setParam(GPS_SET_NMEA, commands, 8);
 
-  _delay_ms(50);
+    _delay_ms(50);
 
-  unsigned char rate[2] = {
-    pFrequency, // pFrequency Hertz
-    0x00}; // In SRAM
+    unsigned char rate[2] = {
+        pFrequency, // pFrequency Hertz
+        0x00}; // In SRAM
 
-  gps_setParam(GPS_SET_UPDATE_RATE, rate, 2);
+    gps_setParam(GPS_SET_UPDATE_RATE, rate, 2);
 
-  _delay_ms(50);
+    _delay_ms(50);
 
-  unsigned char pps[2] = {
-    0x01,  // 1PPS bei 3D Fix
-    0x00}; // In SRAM
+    unsigned char pps[2] = {
+        0x01,  // 1PPS on 3D Fix
+        0x00}; // In SRAM
 
-  gps_setParam(GPS_SET_1PPS, pps, 2);
+    gps_setParam(GPS_SET_1PPS, pps, 2);
 
-  _delay_ms(50);
+    _delay_ms(50);
 
-  return TRUE;
+    return TRUE;
 }
 
 unsigned char gps_calculateCS(const unsigned char* pPayload, uint16_t pLength) {
-  unsigned char checkSum = 0;
-  for(uint8_t i = 0; i < pLength; i++) {
-    checkSum ^= pPayload[i];
-  }
-  return checkSum;
+    unsigned char checkSum = 0;
+    for(uint8_t i = 0; i < pLength; i++) {
+        checkSum ^= pPayload[i];
+    }
+    return checkSum;
 }
 
 unsigned char gps_setParam(unsigned char pCommand, unsigned char* pData, uint16_t pLength) {
-  //Startsequenz senden (2 byte)
-  uart_setChar(0xA0);
-  uart_setChar(0xA1);
- 
-  //Payload Length senden (2 byte) == Length + 1 wegen Msg ID
-  uart_setChar(((pLength+1) & 0xFF00) >> 8);
-  uart_setChar((pLength+1) & 0x00FF);
+    // start sequence (2 byte)
+    uart_setChar(0xA0);
+    uart_setChar(0xA1);
 
-  //Payload senden
+    // payload length (2 byte) == pLength + 1 because of message ID byte
+    uart_setChar(((pLength+1) & 0xFF00) >> 8);
+    uart_setChar((pLength+1) & 0x00FF);
 
-  //MsgID (1 byte)
-  uart_setChar(pCommand);
+    // payload
 
-  //Data (pLength byte)
-  for(uint8_t i = 0; i < pLength; i++) {
-    uart_setChar(pData[i]);
-  }
+    // message ID (1 byte)
+    uart_setChar(pCommand);
 
-  //Checksum (1 byte)
-  uart_setChar(gps_calculateCS(pData, pLength) ^ pCommand);
+    // data (pLength byte)
+    for(uint8_t i = 0; i < pLength; i++) {
+        uart_setChar(pData[i]);
+    }
 
-  //Stopsequenz senden (2 byte)
-  uart_setChar(CR);
-  uart_setChar(LF);
+    // checksum (1 byte)
+    uart_setChar(gps_calculateCS(pData, pLength) ^ pCommand);
 
-  return GPS_ACK;
+    // stop sequence (2 byte)
+    uart_setChar(CR);
+    uart_setChar(LF);
+
+    return GPS_ACK;
 }
 
 uint8_t gps_checkNMEA(const char* pSentence, uint8_t pMessageType, char* pPrefix, 
     uint8_t pValidityToken, char* pValidityCheck, uint8_t pCheckEquality) {
 
-    // Sweep through the sentence once, while doing:
-    // * Prefix check (return instantly if invalid)
-    // * Searching for validityToken and comparison with validityCheck
-    // * Calculation of checksum and comparison with given one (if given)
-    // WARNING: Long and ugly code ahead ;-)
-    
     // Counter variables for the different strings which have to be checked
     uint8_t sentenceCounter = 0;
     uint8_t prefixCounter = 0;
