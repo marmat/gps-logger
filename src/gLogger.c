@@ -59,8 +59,8 @@
  * \brief Indicates an error using the LED. Loops forever
  *
  * Once the error method is called, there is no way back. The code influences
- * the flashing sequence of the LED. In general, the LED flashes code times with
- * a break of 100ms between each flash, then the LED is 500ms off and then 
+ * the flashing sequence of the LED. In general, the LED flashes (code+1) times 
+ * with a break of 100ms between each flash, then the LED is 500ms off and then 
  * the whole sequence repeats itself.
  *
  * \param code The error code which shall be displayed
@@ -88,18 +88,18 @@ int main (void) {
 
 	// Ports definieren
 	IO_CONF |= (1 << LED_STAT);
-	LEDCODE_ON();
+    LEDCODE_ON();
 
   // Unnötige Module ausschalten (Power-reduction)
   PRR |= (1 << PRTWI) | (1 << PRTIM2) | (1 << PRTIM0) | (1 << PRTIM1) | (1 << PRADC);
 
-  _delay_s(1);
+  _delay_ms(250);
 
     // Initialize each module seperately in order to display a better error code
-    while (!sdmmc_init()) {
+    if (!sdmmc_init()) {
         error(1);
     }
-    
+  
     if (!nofs_init()) {
         error(2);
     }
@@ -108,14 +108,18 @@ int main (void) {
         error(3);
     }
 
+    // Write a short information string containing the firmware version (NMEA compliant)
+    nofs_writeString("$PGLGVER,1.4a2\r\n");
+
   LEDCODE_OFF();
 
   char nmeaBuf[128];
+  uint8_t result = 0;
 
   while(1) {
     // Geschrieben wird nur, wenn NMEA-Kommando einen Fix hatte
-    if(gps_getNMEA(nmeaBuf, 128)) {
-      nofs_writeString(nmeaBuf);
+    if (gps_getNMEA(nmeaBuf, 128) & GPS_NMEA_VALID) {
+        nofs_writeString(nmeaBuf);
     }
 
     // Blinken !!! (das Wichtigste in diesem ganzen Code)
