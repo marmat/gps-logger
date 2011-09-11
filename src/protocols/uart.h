@@ -31,7 +31,8 @@
     #define UART_NOERROR 0x00
     #define UART_BUF_OVERRUN 0x02
 
-    #define UART_BUFFER_SIZE 128
+    #define UART_INPUT_BUFFER_SIZE 128
+    #define UART_OUTPUT_BUFFER_SIZE 32
 
     #define UART_BUFFER_OVERFLOW 0x00
 
@@ -98,5 +99,4 @@
      * \brief Empties the input buffer, discarding everything inside.
      */ 
     void uart_clearBuf();
-    
 #endif

@@ -56,4 +56,28 @@
      * doing nothing
      */
     void _delay_s(uint8_t pSeconds);
+    
+    /**
+     * \brief Checks if the given string starts with the given pattern
+     *
+     * Both Strings have to be NULL-Terminated! pString will not be modified
+
+     * in any way (in fact, it can't because of the const declaration).
+     *
+     * \param pString The string which should be checked
+     * \param pPattern The pattern for which will be checked in pString
+     * \return TRUE if the string starts with the pattern, FALSE otherwise
+
+     */
+    uint8_t strStartsWith(const char *pString, char *pPattern);
+    
+    /**
+     * \brief Takes a character and returns its equivalent integer
+     * 
+
+     * \param pChar a char from the set {0,1,...,9,A,B,...,F,a,b,...,f}
+     * \return An integer containing the value of the given hexadecimal character
+     * or 0 if the character hasn't been recognized
+     */
+    uint8_t hexCharToInt(char pChar);    
 #endif

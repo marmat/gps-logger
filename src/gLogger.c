@@ -11,6 +11,32 @@
 #include "modules/gps.h"
 
 /**
+ * \brief Indicates an error using the LED. Loops forever
+ *
+ * Once the error method is called, there is no way back. The code influences
+ * the flashing sequence of the LED. In general, the LED flashes (code+1) times 
+ * with a break of 100ms between each flash, then the LED is 500ms off and then 
+ * the whole sequence repeats itself.
+ *
+ * \param code The error code which shall be displayed
+ */
+void error(uint8_t code) {
+    LEDCODE_OFF();
+    
+    while (TRUE) {
+        for (uint8_t i = 0; i <= code; i++) {
+            LEDCODE_ON();
+            _delay_ms(100);
+            LEDCODE_OFF();
+            _delay_ms(100);
+        }
+        
+        _delay_ms(250);
+        _delay_ms(150);
+    }
+}
+
+/**
  * \brief Main method of the project
  *
  * This method contains the general workflow of the device. This is the place
@@ -22,35 +48,43 @@
  * prior to the return statement.
  */
 int main (void) {
+
     // Activate interrupts
     sei();  
 
     // Configure ports
-    IO_CONF |= (1 << LED_STAT);
+	IO_CONF |= (1 << LED_STAT);
     LEDCODE_ON();
 
-    // Disable unnecessary functions (Power-reduction)
+    // Disable unneccesary modules
     PRR |= (1 << PRTWI) | (1 << PRTIM2) | (1 << PRTIM0) | (1 << PRTIM1) | (1 << PRADC);
 
-    // Wait a second...
-    _delay_s(1);
+    _delay_ms(250);
 
-    // Initialize modules (if either one returns FALSE, the code will terminate
-    // here in the while(TRUE)-loop, signalizing an error to the user)
-    if (!(nofs_init() && gps_init())) {
-        while(TRUE) {
-            _delay_ms(100);
-            LEDCODE_BLINK();    
-        }
+    // Initialize each module seperately in order to display a better error code
+    if (!sdmmc_init()) {
+        error(1);
     }
+  
+    if (!nofs_init()) {
+        error(2);
+    }
+    
+    if (!gps_init(1, GPS_NMEA_GGA | GPS_NMEA_RMC)) {
+        error(3);
+    }
+
+    // Write a short information string containing the firmware version (NMEA compliant)
+    nofs_writeString("$PGLGVER,1.4a2\r\n");
 
     LEDCODE_OFF();
 
     char nmeaBuf[128];
+    uint8_t result = 0;
 
-    while(TRUE) {
+    while(1) {
         // We'll write the data only if it contains a valid position
-        if (gps_getNmeaSentence(nmeaBuf, 128)) {
+        if (gps_getNMEA(nmeaBuf, 128) & GPS_NMEA_VALID) {
             nofs_writeString(nmeaBuf);
         }
 

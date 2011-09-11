@@ -8,14 +8,14 @@
 #include <avr/interrupt.h>
 
 /// FIFO input buffer
-static volatile char uart_inputBuf0[UART_BUFFER_SIZE];
+static volatile char uart_inputBuf0[UART_INPUT_BUFFER_SIZE];
 /// Index of the last character that has been read in the input buffer
 static volatile uint8_t uart_inputBuf0Read = 0;
 /// Index of the last charachter that has been written in the input buffer
 static volatile uint8_t uart_inputBuf0Write = 0;
 
 /// FIFO output buffer
-static volatile char uart_outputBuf0[UART_BUFFER_SIZE];
+static volatile char uart_outputBuf0[UART_OUTPUT_BUFFER_SIZE];
 /// Index of the last character that has been read in the output buffer
 static volatile uint8_t uart_outputBuf0Read = 0;
 /// Index of the last character that has been written in the output buffer
@@ -36,7 +36,7 @@ void uart_init(uint8_t pConfig, uint16_t pUbr) {
 unsigned char uart_getChar() {
     if (uart_inputBuf0Read != uart_inputBuf0Write) {
         // increment reading pointer while catching a possible array overflow
-        if (++uart_inputBuf0Read >= UART_BUFFER_SIZE) {
+        if (++uart_inputBuf0Read >= UART_INPUT_BUFFER_SIZE) {
             uart_inputBuf0Read = 0;
         }
 
@@ -69,7 +69,7 @@ uint8_t uart_getString(char* pResult, uint8_t pResultSize) {
 
 void uart_setChar(char pData) {
     // write byte into the output buffer, wait if the buffer is currently full
-    if (uart_outputBuf0Write+1 >= UART_BUFFER_SIZE) {
+    if (uart_outputBuf0Write+1 >= UART_OUTPUT_BUFFER_SIZE) {
         // writing pointer is at the end of the buffer array, next index will be 0  
         while (uart_outputBuf0Read == 0) {
             // wait, buffer is full
@@ -110,7 +110,7 @@ void uart_clearBuf() {
  * If the buffer is full, characters may be discarded.
  */
 ISR(USART_RX_vect) {
-    if(uart_inputBuf0Write+1 >= UART_BUFFER_SIZE) {
+    if(uart_inputBuf0Write+1 >= UART_INPUT_BUFFER_SIZE) {
             // writing pointer is at the end of the buffer array, next index will be 0
             if(uart_inputBuf0Read != 0) {
                 uart_inputBuf0Write = 0;
@@ -140,7 +140,7 @@ ISR(USART_RX_vect) {
 ISR(USART_UDRE_vect) {
     // write next byte until reading index == writing index
     if (uart_outputBuf0Read != uart_outputBuf0Write) {
-        if (++uart_outputBuf0Read >= UART_BUFFER_SIZE) {
+        if (++uart_outputBuf0Read >= UART_OUTPUT_BUFFER_SIZE) {
             uart_outputBuf0Read = 0;
         }
 

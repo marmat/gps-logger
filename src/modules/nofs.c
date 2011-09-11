@@ -25,9 +25,7 @@ uint8_t fWriteCount = 0; // Wird bei jedem "in-den-Buffer" Schreibvorgang hochge
 
 char sectorBuf[NOFS_BUFFER_SIZE];
 
-uint8_t nofs_init() {
-  if (sdmmc_init()) {
-    
+uint8_t nofs_init() { 
     do {
       // Schreibposition (== ETX, 0x03) auf SD-Karte suchen
       sdmmc_readSector(fCurrentSector++, sectorBuf, NOFS_BUFFER_SIZE);
@@ -37,7 +35,7 @@ uint8_t nofs_init() {
           break;
         }
       }
-	
+
     // Solange der Byte-Zeiger an das Ende des Sektors gelangt ist und das letzte Zeichen
     // kein ETX ist, wird die Schleife ein weiteres mal durchlaufen und der nächste Sek-
     // tor durchsucht.
@@ -47,9 +45,6 @@ uint8_t nofs_init() {
     fCurrentSector--;
 
     return TRUE;
-  }
-
-  return FALSE;
 }
 
 uint8_t nofs_writeString(char* pString) {
