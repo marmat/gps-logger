@@ -1,6 +1,28 @@
 /**
  * \file nofs.h
  * \brief Library for accessing a NoFS (NoFileSystem) on the memory card
+ *
+ * Some notes regarding the NoFS:
+ * - The very first bytes of a device are always the same and equal to the
+ *   NOFS_HEADER string (currently "k621.de"). This header is used to identify
+ *   if a device contains a valid NoFS or not
+ * - Starting with firmware version 1.5, the NOFS_HEADER is followed by an
+ *   uint32_t value (MSB first), containing the number of a sector which is
+ *   definitely _before_ the NOFS_TERMINAL byte, but as close to it as
+ *   possible. This enhances the inital scan to determine the writing position
+ *   as the application can jump directly to the specified sector and begin
+ *   the scanning from there on.
+ * - After this integer, the actual data starts. Basically the data bytes can 
+ *   contain every value except for NOFS_TERMINAL. Preferrably the data should
+ *   contain only printable ASCII characters (including \\r, \\n & \\t), though.
+ * - The data must be terimanted with a NOFS_TERMINAL. This byte is placed 
+ *   always in the _first_ byte of the sector which follows the last sector
+ *   with actual data. Example: if the data goes until sector #42, byte #234,
+ *   the NOFS_TERMINAL has to be written to sector #43, byte #0. The application
+ *   should ensure that there is always at least one NOFS_TERMINAL present on
+ *   the device (i.e. write the new NOFS_TERMINAL _before_ overwriting the 
+ *   old one).
+ *
  * \author Martin Matysiak
  */
 
