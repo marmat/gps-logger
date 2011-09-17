@@ -17,11 +17,12 @@
  *   contain only printable ASCII characters (including \\r, \\n & \\t), though.
  * - The data must be terimanted with a NOFS_TERMINAL. This byte is placed 
  *   always in the _first_ byte of the sector which follows the last sector
- *   with actual data. Example: if the data goes until sector #42, byte #234,
- *   the NOFS_TERMINAL has to be written to sector #43, byte #0. The application
- *   should ensure that there is always at least one NOFS_TERMINAL present on
- *   the device (i.e. write the new NOFS_TERMINAL _before_ overwriting the 
- *   old one).
+ *   with actual data as well directly after the last data byte. Example: if 
+ *   the data goes until sector #42, byte #234, the NOFS_TERMINAL has to be 
+ *   written to sector #42, byte #235 as well as sector #43, byte #0. 
+ *   The application should ensure that there is always at least one 
+ *   NOFS_TERMINAL present on the device (i.e. write the new NOFS_TERMINALs 
+ *  _before_ overwriting the old ones).
  *
  * \author Martin Matysiak
  */
