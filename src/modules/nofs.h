@@ -36,6 +36,17 @@
      * \return TRUE on success, FALSE otherwise
      */
     uint8_t nofs_writeString(char* pString);
+    
+    /**
+     * \brief Writes the current data buffer onto the memory card
+     * 
+     * The buffer gets written to the sector specified by the global field
+     * fCurrentSector. Additionally, there will be written a NOFS_TERMINAL
+     * into the respective next sector (i.e. fCurrentSector + 1). This ensures
+     * that the scanning algorithm during initialization won't fail to
+     * find a terminal symbol.
+     */
+    void nofs_flush();
 #endif
 
 

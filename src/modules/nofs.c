@@ -81,3 +81,17 @@ uint8_t nofs_writeString(char* pString) {
 
     return TRUE;
 }
+
+void nofs_flush() {
+    // Remember the first byte as we will replace it with the NOFS_TERMINAL
+    // temporarily to write the current+1 sector
+    char temp = sectorBuf[0];
+    sectorBuf[0] = NOFS_TERMINAL;
+    sdmmc_writeSector(fCurrentSector + 1, sectorBuf);
+    
+    _delay_ms(10);
+    
+    // Now write the actual current sector
+    sectorBuf[0] = temp;
+    sdmmc_writeSector(fCurrentSector, sectorBuf);
+}

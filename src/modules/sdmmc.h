@@ -12,6 +12,25 @@
     
     /// The default size of a sector on memory cards
     #define SDMMC_SECTOR_SIZE 512
+    
+    /// CMD0 - Change from SD into SPI mode
+    #define SDMMC_GO_IDLE_STATE 0
+    /// CMD1 - Initialize card
+    #define SDMMC_SEND_OP_COND 1
+    /// CMD17 - Read a single block
+    #define SDMMC_READ_SINGLE_BLOCK 17
+    /// CMD24 - Write a block
+    #define SDMMC_WRITE_BLOCK 24
+    
+    /// Precalculated Checksum for CMD0
+    #define SDMMC_GO_IDLE_STATE_CRC 0x95
+    
+    /// Default CRC value when in SPI mode (won't be checked)
+    #define SDMMC_DEFAULT_CRC 0xFF
+    
+    /// Macro to convert from a sector count to a byte count
+    #define SECTOR_TO_BYTE(pSector) pSector << 9 // << 9 equals * 512
+    
 
     /**
      * \brief Initializes the SD/MMC-card

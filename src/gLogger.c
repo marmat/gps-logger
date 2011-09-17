@@ -80,7 +80,6 @@ int main (void) {
     LEDCODE_OFF();
 
     char nmeaBuf[128];
-    uint8_t result = 0;
 
     while(1) {
         // We'll write the data only if it contains a valid position
