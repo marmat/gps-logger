@@ -12,6 +12,22 @@ void _delay_s(uint8_t pSeconds) {
     }
 }
 
+void error(uint8_t pCode) {
+    LEDCODE_OFF();
+    
+    while (TRUE) {
+        for (uint8_t i = 0; i < pCode; i++) {
+            LEDCODE_ON();
+            _delay_ms(100);
+            LEDCODE_OFF();
+            _delay_ms(100);
+        }
+        
+        _delay_ms(250);
+        _delay_ms(150);
+    }
+}
+
 uint8_t strStartsWith(const char *pString, char *pPattern) {
     uint8_t i = 0;
     while(pPattern[i]) {

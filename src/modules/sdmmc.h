@@ -33,11 +33,9 @@
     
 
     /**
-     * \brief Initializes the SD/MMC-card
-     *
-     * \return TRUE if initialization succeeded, otherwise FALSE
+     * \brief Initializes the SD/MMC-card. Locks the processor in case of error
      */
-    uint8_t sdmmc_init();
+    void sdmmc_init();
 
     /**
      * \brief Writes the given data to the given sector

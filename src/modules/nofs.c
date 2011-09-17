@@ -15,10 +15,10 @@ uint8_t fWriteCount = 0;
 /// Buffer which holds the currently active sector
 char sectorBuf[NOFS_BUFFER_SIZE];
 
-uint8_t nofs_init() { 
+void nofs_init() { 
     /*
         Steps of initialization:
-        1) Call initialization of underlying SDMMC interface // currently external
+        1) Call initialization of underlying SDMMC interface
         2) Read the first sector
         3) Check if sector starts with NOFS_HEADER (return FALSE if not)
         4) Get position of last scan for writing position
@@ -26,6 +26,10 @@ uint8_t nofs_init() {
         6) Jump back to first sector and update last writing position
         7) Jump forward to writing position, return TRUE
     */
+    
+    // Step 1
+    sdmmc_init();
+    
     do {
         // Search for the end of data (== ETX, 0x03) on the memory card, which
         // will be the position from where we will start writing
@@ -43,8 +47,6 @@ uint8_t nofs_init() {
 
     // Undo the last "++"
     fCurrentSector--;
-
-    return TRUE;
 }
 
 uint8_t nofs_writeString(char* pString) {

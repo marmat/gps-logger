@@ -20,14 +20,9 @@
     #define NOFS_TERMINAL ETX 
 
     /**
-     * \brief Initializes the NoFS
-     *
-     * Please note that the memory card has to be initialized already seperately
-     * before (by calling sdmmc_init() or sth equivalent).
-     *
-     * \return TRUE on success, FALSE otherwise
+     * \brief Initializes the NoFS. Locks the processor in case of error
      */
-    uint8_t nofs_init();
+    void nofs_init();
 
     /**
      * \brief Appends a character string to the present data

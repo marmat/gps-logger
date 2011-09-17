@@ -37,6 +37,13 @@
     #define LF 0x0A    
     ///ASCII character no. 13 - Carriage Return
     #define CR 0x0D
+    
+    /// Error code for a generic error in the SDMMC library
+    #define ERROR_SDMMC 2
+    /// Error code for a generic error in the NOFS library
+    #define ERROR_NOFS 3
+    /// Error code for a generic error in the GPS library
+    #define ERROR_GPS 4
 
     #include <stdint.h>
     #include <stdlib.h>
@@ -56,6 +63,20 @@
      * doing nothing
      */
     void _delay_s(uint8_t pSeconds);
+    
+    /**
+     * \brief Indicates an error using the LED. !LOOPS FOREVER!
+     *
+     * Once the error method is called, there is no way back. The code 
+     * influences the flashing sequence of the LED. In general, the LED 
+     * flashes pCode times with a break of 100ms between each flash, then 
+     * the LED is 500ms off and then the whole sequence repeats itself.
+     *
+     * \param code The error code which shall be displayed. Note: a parameter
+     * value of 1 should not be used in order to prevent confusion with the
+     * regular flashing pattern
+     */
+    void error(uint8_t pCode);
     
     /**
      * \brief Checks if the given string starts with the given pattern

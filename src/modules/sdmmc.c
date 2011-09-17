@@ -6,50 +6,49 @@
 
 #include "modules/sdmmc.h"
 
-uint8_t sdmmc_init() {
-    if (spi_init()) {
-        uint8_t response = 0;
-        uint8_t retry = 0;
-
-        // Send some dummy bytes before actual data
-        for(uint8_t i = 0; i < 20; i++) {
-            spi_writeByte(0xFF);
-        }
-
-        // Send command 0 (GO_IDLE_STATE, i.e. change from SD into SPI mode)
-        while (response != 1) {
-            response = sdmmc_writeCommand(SDMMC_GO_IDLE_STATE, 0, SDMMC_GO_IDLE_STATE_CRC); // 0x95 is a precalculated CRC checksum
-            
-            // If the device does not respond correctly, return FALSE after
-            // having it tried several times
-            if (retry++ == 0xFF) {
-                CLEAR_CS();
-                return FALSE;
-            }
-        }
-
-        // Send copmmand 1 (SEND_OP_COND, initialize card)
-        response = 0xFF;
-        retry = 0;
-
-        while (response != 0) {
-            response = sdmmc_writeCommand(SDMMC_SEND_OP_COND, 0, SDMMC_DEFAULT_CRC);
-
-            if (retry++ == 0xFF) {
-                CLEAR_CS();
-                return FALSE;
-            }
-        }
-
-        CLEAR_CS();
-
-        // switch to higher SPI frequency once initialized
-        spi_highspeed();
-
-        return TRUE;
+void sdmmc_init() {
+    // Initializes SPI interface first
+    if (!spi_init()) {
+        error(ERROR_SDMMC);
     }
 
-    return FALSE;
+    uint8_t response = 0;
+    uint8_t retry = 0;
+
+    // Send some dummy bytes before actual data
+    for(uint8_t i = 0; i < 20; i++) {
+        spi_writeByte(0xFF);
+    }
+
+    // Send command 0 (GO_IDLE_STATE, i.e. change from SD into SPI mode)
+    while (response != 1) {
+        response = sdmmc_writeCommand(SDMMC_GO_IDLE_STATE, 0, SDMMC_GO_IDLE_STATE_CRC); // 0x95 is a precalculated CRC checksum
+        
+        // If the device does not respond correctly, return FALSE after
+        // having it tried several times
+        if (retry++ == 0xFF) {
+            CLEAR_CS();
+            error(ERROR_SDMMC);
+        }
+    }
+
+    // Send copmmand 1 (SEND_OP_COND, initialize card)
+    response = 0xFF;
+    retry = 0;
+
+    while (response != 0) {
+        response = sdmmc_writeCommand(SDMMC_SEND_OP_COND, 0, SDMMC_DEFAULT_CRC);
+
+        if (retry++ == 0xFF) {
+            CLEAR_CS();
+            error(ERROR_SDMMC);
+        }
+    }
+
+    CLEAR_CS();
+
+    // switch to higher SPI frequency once initialized
+    spi_highspeed();
 }
 
 uint8_t sdmmc_writeCommand(uint8_t pCommand, uint32_t pArgument, uint8_t pCrc) {
