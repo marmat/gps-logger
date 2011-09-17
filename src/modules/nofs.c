@@ -16,10 +16,20 @@ uint8_t fWriteCount = 0;
 char sectorBuf[NOFS_BUFFER_SIZE];
 
 uint8_t nofs_init() { 
+    /*
+        Steps of initialization:
+        1) Call initialization of underlying SDMMC interface // currently external
+        2) Read the first sector
+        3) Check if sector starts with NOFS_HEADER (return FALSE if not)
+        4) Get position of last scan for writing position
+        5) Jump to this position and scan for NOFS_TERMINAL from there on
+        6) Jump back to first sector and update last writing position
+        7) Jump forward to writing position, return TRUE
+    */
     do {
         // Search for the end of data (== ETX, 0x03) on the memory card, which
         // will be the position from where we will start writing
-        sdmmc_readSector(fCurrentSector++, sectorBuf, NOFS_BUFFER_SIZE);
+        sdmmc_readSector(fCurrentSector++, sectorBuf);
 
         for(fCurrentByte = 0; fCurrentByte < NOFS_BUFFER_SIZE; fCurrentByte++) {
             if (sectorBuf[fCurrentByte] == ETX) {
@@ -47,14 +57,14 @@ uint8_t nofs_writeString(char* pString) {
             sectorBuf[fCurrentByte++] = pString[i++];
         } else {    
             // Sector full, write onto memory card and get the next one
-            sdmmc_writeSector(fCurrentSector++, sectorBuf, NOFS_BUFFER_SIZE);
+            sdmmc_writeSector(fCurrentSector++, sectorBuf);
             _delay_ms(10);
 
-            sdmmc_readSector(fCurrentSector, sectorBuf, NOFS_BUFFER_SIZE);
+            sdmmc_readSector(fCurrentSector, sectorBuf);
 
             // For safety's sake, write a ETX into the next sector
             sectorBuf[0] = ETX;
-            sdmmc_writeSector(fCurrentSector, sectorBuf, NOFS_BUFFER_SIZE);
+            sdmmc_writeSector(fCurrentSector, sectorBuf);
 
             fCurrentByte = 0;
         }
@@ -65,7 +75,7 @@ uint8_t nofs_writeString(char* pString) {
 
     // Write buffer if this is the N-th call of the method
     if (fWriteCount++ == NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND) {
-        sdmmc_writeSector(fCurrentSector, sectorBuf, NOFS_BUFFER_SIZE);
+        sdmmc_writeSector(fCurrentSector, sectorBuf);
         fWriteCount = 0;
     }
 

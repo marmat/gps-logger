@@ -7,13 +7,17 @@
 #ifndef NOFS_H
     #define NOFS_H
 
-    /// Size of the NoFS-Buffer (equals the block size on a memory card)
-    #define NOFS_BUFFER_SIZE 512 
-    /// The buffer will be written on the memory card only every N writeString calls
-    #define NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND 10
-
     #include "global.h"
     #include "modules/sdmmc.h"
+    
+    /// Size of the NoFS-Buffer (equals the block size on a memory card)
+    #define NOFS_BUFFER_SIZE SDMMC_SECTOR_SIZE
+    /// The buffer will be written on the memory card only every N writeString calls
+    #define NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND 10  
+    /// The header which identifies a valid NoFS memory card
+    #define NOFS_HEADER "k621.de" 
+    /// The byte which is written to indicate the end of a NoFS partition
+    #define NOFS_TERMINAL ETX 
 
     /**
      * \brief Initializes the NoFS

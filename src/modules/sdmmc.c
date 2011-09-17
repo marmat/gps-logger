@@ -95,7 +95,7 @@ uint8_t sdmmc_writeCommand(uint8_t pCommand, uint32_t pArgument, uint8_t pCrc) {
     return result;
 }
 
-uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput, uint16_t pByteCount) {
+uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput) {
     SET_CS();
 
     // Send command 24 (WRITE_BLOCK)
@@ -113,7 +113,7 @@ uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput, uint16_t pByteCount
     spi_writeByte(0xFE);
 
     // Send data
-    for(uint16_t i = 0; i < pByteCount; i++) {
+    for(uint16_t i = 0; i < SDMMC_SECTOR_SIZE; i++) {
         spi_writeByte(pInput[i]);
     }
 
@@ -136,7 +136,7 @@ uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput, uint16_t pByteCount
     return TRUE;
 }
 
-uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput, uint16_t pByteCount) {
+uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput) {
     SET_CS();
 
     // Send command 17 (READ_SINGLE_BLOCK)
@@ -160,7 +160,7 @@ uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput, uint16_t pByteCount
     }
 
     // Read the block
-    for (uint16_t i = 0; i < pByteCount; i++) {
+    for (uint16_t i = 0; i < SDMMC_SECTOR_SIZE; i++) {
         pOutput[i] = spi_readByte();
     }
 

@@ -9,6 +9,9 @@
 
     #include "global.h"
     #include "protocols/spi.h"
+    
+    /// The default size of a sector on memory cards
+    #define SDMMC_SECTOR_SIZE 512
 
     /**
      * \brief Initializes the SD/MMC-card
@@ -26,11 +29,9 @@
      * \param pSectorNum an integer containing the index of the sector to which
      * the data should be written
      * \param pInput a string of characters which should be written
-     * \param pByteCount the length of the given character string (should equal
-     * 512, will probably removed in the next firmware version)
      * \return TRUE on success, otherwise FALSE
      */
-    uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput, uint16_t pByteCount);
+    uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput);
     
     /**
      * \brief Sends a command to the SD/MMC-card
@@ -56,11 +57,9 @@
      * should be read out
      * \param pOutput A buffer to which the data will be written (make sure it's
      * at least 512 bytes large)
-     * \param pByteCount The length of the pOutput buffer (must be at least 512,
-     * parameter will probably be removed in the next firmware version)
      * \return TRUE on success, otherwise FALSE
      */
-    uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput, uint16_t pByteCount);
+    uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput);
 #endif
 
 
