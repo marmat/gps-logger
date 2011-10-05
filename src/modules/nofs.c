@@ -39,35 +39,43 @@ void nofs_init() {
     }
     
     // Step 4
-    // TODO //
+    for (uint8_t i = 0; i < 4; i++) {
+        fCurrentSector += sectorBuf[NOFS_HEADER_LENGTH + i] << ((3 - i) * 8); // MSB first
+    }
     
     // Step 5
-    // TODO //
+    sdmmc_readSector(fCurrentSector, sectorBuf);
+
+    // Search for NOFS_TERMINAL which has to be located in byte 0 of a sector
+    while(sectorBuf[0] != NOFS_TERMINAL) {
+        sdmmc_readSector(++fCurrentSector, sectorBuf);
+    }
+
+    // Now got the sector in front of this one and look for the last byte with actual data
+    sdmmc_readSector(--fCurrentSector, sectorBuf);
+
+    while((sectorBuf[fCurrentByte] != NOFS_TERMINAL) && (fCurrentByte < NOFS_BUFFER_SIZE)) {
+        fCurrentByte++;
+    }
+
+    // Check if we have the edge case that the sector was filled up to the very last byte
+    if (fCurrentByte == NOFS_BUFFER_SIZE) {
+        // Set start marker to next sector, byte 0
+        fCurrentSector++;
+        fCurrentByte = 0;
+    }
     
     // Step 6
-    // TODO //
+    sdmmc_readSector(0, sectorBuf);
+
+    for (uint8_t i = 0; i < 4; i++) {
+        sectorBuf[NOFS_HEADER_LENGTH + i] = fCurrentSector & (0xFF << (3 - i) * 8); // MSB first
+    }
+
+    sdmmc_writeSector(0, sectorBuf);
     
     // Step 7
-    // TODO //
-    
-    // Old code:
-    do {
-        // Search for the end of data (== ETX, 0x03) on the memory card, which
-        // will be the position from where we will start writing
-        sdmmc_readSector(fCurrentSector++, sectorBuf);
-
-        for(fCurrentByte = 0; fCurrentByte < NOFS_BUFFER_SIZE; fCurrentByte++) {
-            if (sectorBuf[fCurrentByte] == ETX) {
-                break;
-            }
-        }
-
-        // As long as the pointer points to the very last byte of the sector and
-        // this byte isn't a ETX, we will get the next sector on the card
-    } while((fCurrentByte == NOFS_BUFFER_SIZE) && (sectorBuf[fCurrentByte - 1] != ETX));
-
-    // Undo the last "++"
-    fCurrentSector--;
+    sdmmc_readSector(fCurrentSector, sectorBuf);
 }
 
 uint8_t nofs_writeString(char* pString) {

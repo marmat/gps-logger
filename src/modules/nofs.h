@@ -39,6 +39,8 @@
     #define NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND 10  
     /// The header which identifies a valid NoFS memory card
     #define NOFS_HEADER "k621.de" 
+    /// The length of NOFS_HEADER
+    #define NOFS_HEADER_LENGTH 7
     /// The byte which is written to indicate the end of a NoFS partition
     #define NOFS_TERMINAL ETX 
 
