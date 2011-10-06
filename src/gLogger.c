@@ -41,7 +41,7 @@ int main (void) {
     gps_init(1, GPS_NMEA_GGA | GPS_NMEA_RMC); // 1 stands for 1 Hz
 
     // Write a short information string containing the firmware version (NMEA compliant)
-    nofs_writeString("\r\n$PGLGVER,1.5rc1\r\n");
+    nofs_writeString("\r\n$PGLGVER,1.5rc2\r\n");
 
     LEDCODE_OFF();
 

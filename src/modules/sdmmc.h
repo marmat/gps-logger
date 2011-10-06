@@ -17,6 +17,8 @@
     #define SDMMC_GO_IDLE_STATE 0
     /// CMD1 - Initialize card
     #define SDMMC_SEND_OP_COND 1
+    /// CMD16 - Set Blocklength
+    #define SDMMC_SET_BLOCKLEN 16
     /// CMD17 - Read a single block
     #define SDMMC_READ_SINGLE_BLOCK 17
     /// CMD24 - Write a block
@@ -40,8 +42,9 @@
     /**
      * \brief Writes the given data to the given sector
      *
-     * Please note that writing operations can only be done in 512 byte blocks
-     * as one can not change the block size on a memory card.
+     * Please note that writing operations will be done by default in 
+     * 512 byte blocks unless the block length has been changed by using
+     * sdmmc_changeBlockLength.
      *
      * \param pSectorNum an integer containing the index of the sector to which
      * the data should be written
@@ -67,8 +70,9 @@
     /**
      * \brief Reads a sector from the SD/MMC-card
      *
-     * Please note that reading operations can only be done in 512 byte blocks
-     * as one can not change the block size on a memory card.
+     * Please note that reading operations will be done by default in 
+     * 512 byte blocks unless the block langth has been changed by using 
+     * sdmmc_changeBlockLength.
      *
      * \param pSectorNum an integer containing the index of the sector which
      * should be read out
@@ -77,6 +81,20 @@
      * \return TRUE on success, otherwise FALSE
      */
     uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput);
+
+    /**
+     * \brief Changes the length of a block in read and write operations
+     *
+     * This command utilizes CMD16 to alter the block size which will be
+     * used in read and write commands. Please note that this feature might
+     * not work with every SD card! If it fails, the default block size
+     * of 512 Bytes will remain unchanged.
+     *
+     * \param pLength the new length of a block. Set to 0 if default size should
+     * be set.
+     * \return TRUE on success, otherwise FALSE
+     */
+    uint8_t sdmmc_changeBlockLength(uint16_t pLength);
 #endif
 
 

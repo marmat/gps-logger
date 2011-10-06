@@ -44,6 +44,11 @@ void nofs_init() {
     }
     
     // Step 5
+
+    // As we're only interested in the very first byte of each sector, we try to
+    // change the block size. If it succeeds, scanning will be A LOT faster, if
+    // not, it'll still work.
+    sdmmc_changeBlockLength(1);
     sdmmc_readSector(fCurrentSector, sectorBuf);
 
     // Search for NOFS_TERMINAL which has to be located in byte 0 of a sector
@@ -51,14 +56,20 @@ void nofs_init() {
         sdmmc_readSector(++fCurrentSector, sectorBuf);
     }
 
-    // Now got the sector in front of this one and look for the last byte with actual data
+    // Change block size back to default. Won't have any effect if the previous
+    // change failed.
+    sdmmc_changeBlockLength(0);
+
+    // Now get the sector in front of this one and look for the last 
+    // byte with actual data
     sdmmc_readSector(--fCurrentSector, sectorBuf);
 
     while((sectorBuf[fCurrentByte] != NOFS_TERMINAL) && (fCurrentByte < NOFS_BUFFER_SIZE)) {
         fCurrentByte++;
     }
 
-    // Check if we have the edge case that the sector was filled up to the very last byte
+    // Check if we have the edge case that the sector was filled 
+    // up to the very last byte
     if (fCurrentByte == NOFS_BUFFER_SIZE) {
         // Set start marker to next sector, byte 0
         fCurrentSector++;

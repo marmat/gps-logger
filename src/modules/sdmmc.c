@@ -6,6 +6,9 @@
 
 #include "modules/sdmmc.h"
 
+/// The block length which is currently set
+uint16_t fBlockLength = SDMMC_SECTOR_SIZE;
+
 void sdmmc_init() {
     // Initializes SPI interface first
     if (!spi_init()) {
@@ -112,7 +115,7 @@ uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput) {
     spi_writeByte(0xFE);
 
     // Send data
-    for(uint16_t i = 0; i < SDMMC_SECTOR_SIZE; i++) {
+    for(uint16_t i = 0; i < fBlockLength; i++) {
         spi_writeByte(pInput[i]);
     }
 
@@ -157,7 +160,7 @@ uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput) {
     }
 
     // Read the block
-    for (uint16_t i = 0; i < SDMMC_SECTOR_SIZE; i++) {
+    for (uint16_t i = 0; i < fBlockLength; i++) {
         pOutput[i] = spi_readByte();
     }
 
@@ -166,5 +169,22 @@ uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput) {
     spi_readByte();
 
     CLEAR_CS();
+    return TRUE;
+}
+
+
+uint8_t sdmmc_changeBlockLength(uint16_t pLength) {
+    if (pLength == 0) {
+        pLength = SDMMC_SECTOR_SIZE;
+    }
+
+    SET_CS();
+    if (sdmmc_writeCommand(SDMMC_SET_BLOCKLEN, pLength, SDMMC_DEFAULT_CRC) != 0) {
+        CLEAR_CS();
+        return FALSE;
+    }
+
+    CLEAR_CS();
+    fBlockLength = pLength;
     return TRUE;
 }
