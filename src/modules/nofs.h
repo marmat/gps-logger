@@ -35,8 +35,6 @@
     
     /// Size of the NoFS-Buffer (equals the block size on a memory card)
     #define NOFS_BUFFER_SIZE SDMMC_SECTOR_SIZE
-    /// The buffer will be written on the memory card only every N writeString calls
-    #define NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND 10  
     /// The header which identifies a valid NoFS memory card
     #define NOFS_HEADER "k621.de" 
     /// The length of NOFS_HEADER
@@ -53,9 +51,8 @@
      * \brief Appends a character string to the present data
      * 
      * \param pString A null-terminated character string which should be written
-     * \return TRUE on success, FALSE otherwise
      */
-    uint8_t nofs_writeString(char* pString);
+    void nofs_writeString(char* pString);
     
     /**
      * \brief Writes the current data buffer onto the memory card
@@ -68,5 +65,3 @@
      */
     void nofs_flush();
 #endif
-
-

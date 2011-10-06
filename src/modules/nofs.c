@@ -69,7 +69,7 @@ void nofs_init() {
     sdmmc_readSector(0, sectorBuf);
 
     for (uint8_t i = 0; i < 4; i++) {
-        sectorBuf[NOFS_HEADER_LENGTH + i] = fCurrentSector & (0xFF << (3 - i) * 8); // MSB first
+        sectorBuf[NOFS_HEADER_LENGTH + i] = (fCurrentSector >> ((3 - i) * 8)) & 0xFF; // MSB first
     }
 
     sdmmc_writeSector(0, sectorBuf);
@@ -78,7 +78,7 @@ void nofs_init() {
     sdmmc_readSector(fCurrentSector, sectorBuf);
 }
 
-uint8_t nofs_writeString(char* pString) {
+void nofs_writeString(char* pString) {
     // Copy data into the buffer. If the buffer is full, write it onto the
     // memory card and create a new empty one
     uint8_t i = 0;
@@ -86,31 +86,15 @@ uint8_t nofs_writeString(char* pString) {
     while (pString[i]) {
         if(fCurrentByte < NOFS_BUFFER_SIZE) {
             sectorBuf[fCurrentByte++] = pString[i++];
-        } else {    
-            // Sector full, write onto memory card and get the next one
-            sdmmc_writeSector(fCurrentSector++, sectorBuf);
-            _delay_ms(10);
-
-            sdmmc_readSector(fCurrentSector, sectorBuf);
-
-            // For safety's sake, write a ETX into the next sector
-            sectorBuf[0] = ETX;
-            sdmmc_writeSector(fCurrentSector, sectorBuf);
-
+        } else {   
+            nofs_flush();
+            fCurrentSector++;
             fCurrentByte = 0;
         }
     }
 
     // Set the new end of data
     sectorBuf[fCurrentByte] = ETX;
-
-    // Write buffer if this is the N-th call of the method
-    if (fWriteCount++ == NOFS_WRITE_BUFFER_AFTER_NTH_COMMAND) {
-        sdmmc_writeSector(fCurrentSector, sectorBuf);
-        fWriteCount = 0;
-    }
-
-    return TRUE;
 }
 
 void nofs_flush() {

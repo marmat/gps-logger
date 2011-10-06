@@ -33,7 +33,7 @@ int main (void) {
     // Disable unneccesary modules
     PRR |= (1 << PRTWI) | (1 << PRTIM2) | (1 << PRTIM0) | (1 << PRTIM1) | (1 << PRADC);
 
-    _delay_ms(250);
+    _delay_ms(100);
 
     // Initialize the necessary modules (these methods may lock the processor
     // in an endless loop if an error occurs!)
@@ -41,7 +41,7 @@ int main (void) {
     gps_init(1, GPS_NMEA_GGA | GPS_NMEA_RMC); // 1 stands for 1 Hz
 
     // Write a short information string containing the firmware version (NMEA compliant)
-    nofs_writeString("$PGLGVER,1.5a1\r\n");
+    nofs_writeString("\r\n$PGLGVER,1.5rc1\r\n");
 
     LEDCODE_OFF();
 
