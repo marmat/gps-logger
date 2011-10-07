@@ -6,13 +6,13 @@
 
 #include "modules/gps.h"
 
-uint8_t gps_init(uint8_t pFrequency, uint8_t pMessages) {
+void gps_init(uint8_t pFrequency, uint8_t pMessages) {
 
     // initializes UART interface
     uart_init(UART_CONFIGURE(UART_ASYNC, UART_8BIT, UART_1STOP, UART_NOPAR), 
     UART_CALCULATE_BAUD(F_CPU, GPS_BAUDRATE));
 
-    _delay_s(1);
+    _delay_ms(100);
 
     // perform basic configuration using the given parameters
     unsigned char commands[8] = {
@@ -44,8 +44,6 @@ uint8_t gps_init(uint8_t pFrequency, uint8_t pMessages) {
     gps_setParam(GPS_SET_1PPS, pps, 2);
 
     _delay_ms(50);
-
-    return TRUE;
 }
 
 unsigned char gps_calculateCS(const unsigned char* pPayload, uint16_t pLength) {

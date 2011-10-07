@@ -6,50 +6,52 @@
 
 #include "modules/sdmmc.h"
 
-uint8_t sdmmc_init() {
-    if (spi_init()) {
-        uint8_t response = 0;
-        uint8_t retry = 0;
+/// The block length which is currently set
+uint16_t fBlockLength = SDMMC_SECTOR_SIZE;
 
-        // Send some dummy bytes before actual data
-        for(uint8_t i = 0; i < 20; i++) {
-            spi_writeByte(0xFF);
-        }
-
-        // Send command 0 (GO_IDLE_STATE, i.e. change from SD into SPI mode)
-        while (response != 1) {
-            response = sdmmc_writeCommand(0, 0, 0x95); // 0x95 is a precalculated CRC checksum
-            
-            // If the device does not respond correctly, return FALSE after
-            // having it tried several times
-            if (retry++ == 0xFF) {
-                CLEAR_CS();
-                return FALSE;
-            }
-        }
-
-        // Send copmmand 1 (SEND_OP_COND, initialize card)
-        response = 0xFF;
-        retry = 0;
-
-        while (response != 0) {
-            response = sdmmc_writeCommand(1, 0, 0xFF);
-
-            if (retry++ == 0xFF) {
-                CLEAR_CS();
-                return FALSE;
-            }
-        }
-
-        CLEAR_CS();
-
-        // switch to higher SPI frequency once initialized
-        spi_highspeed();
-
-        return TRUE;
+void sdmmc_init() {
+    // Initializes SPI interface first
+    if (!spi_init()) {
+        error(ERROR_SDMMC);
     }
 
-    return FALSE;
+    uint8_t response = 0;
+    uint8_t retry = 0;
+
+    // Send some dummy bytes before actual data
+    for(uint8_t i = 0; i < 20; i++) {
+        spi_writeByte(0xFF);
+    }
+
+    // Send command 0 (GO_IDLE_STATE, i.e. change from SD into SPI mode)
+    while (response != 1) {
+        response = sdmmc_writeCommand(SDMMC_GO_IDLE_STATE, 0, SDMMC_GO_IDLE_STATE_CRC); // 0x95 is a precalculated CRC checksum
+        
+        // If the device does not respond correctly, return FALSE after
+        // having it tried several times
+        if (retry++ == 0xFF) {
+            CLEAR_CS();
+            error(ERROR_SDMMC);
+        }
+    }
+
+    // Send copmmand 1 (SEND_OP_COND, initialize card)
+    response = 0xFF;
+    retry = 0;
+
+    while (response != 0) {
+        response = sdmmc_writeCommand(SDMMC_SEND_OP_COND, 0, SDMMC_DEFAULT_CRC);
+
+        if (retry++ == 0xFF) {
+            CLEAR_CS();
+            error(ERROR_SDMMC);
+        }
+    }
+
+    CLEAR_CS();
+
+    // switch to higher SPI frequency once initialized
+    spi_highspeed();
 }
 
 uint8_t sdmmc_writeCommand(uint8_t pCommand, uint32_t pArgument, uint8_t pCrc) {
@@ -95,11 +97,11 @@ uint8_t sdmmc_writeCommand(uint8_t pCommand, uint32_t pArgument, uint8_t pCrc) {
     return result;
 }
 
-uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput, uint16_t pByteCount) {
+uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput) {
     SET_CS();
 
     // Send command 24 (WRITE_BLOCK)
-    if (sdmmc_writeCommand(24, pSectorNum << 9, 0xFF) != 0) {
+    if (sdmmc_writeCommand(SDMMC_WRITE_BLOCK, SECTOR_TO_BYTE(pSectorNum), SDMMC_DEFAULT_CRC) != 0) {
         CLEAR_CS();
         return FALSE;
     }
@@ -113,7 +115,7 @@ uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput, uint16_t pByteCount
     spi_writeByte(0xFE);
 
     // Send data
-    for(uint16_t i = 0; i < pByteCount; i++) {
+    for(uint16_t i = 0; i < fBlockLength; i++) {
         spi_writeByte(pInput[i]);
     }
 
@@ -136,13 +138,11 @@ uint8_t sdmmc_writeSector(uint32_t pSectorNum, char* pInput, uint16_t pByteCount
     return TRUE;
 }
 
-uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput, uint16_t pByteCount) {
+uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput) {
     SET_CS();
 
     // Send command 17 (READ_SINGLE_BLOCK)
-    // The address is specified in bytes, therefore we have to pass
-    // pSectorNum * BLOCK_SIZE (512), which is equivalent to pSectorNum << 9
-    if (sdmmc_writeCommand(17, pSectorNum << 9, 0xFF) != 0) {
+    if (sdmmc_writeCommand(SDMMC_READ_SINGLE_BLOCK, SECTOR_TO_BYTE(pSectorNum), SDMMC_DEFAULT_CRC) != 0) {
         CLEAR_CS();
         return FALSE;
     }
@@ -160,7 +160,7 @@ uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput, uint16_t pByteCount
     }
 
     // Read the block
-    for (uint16_t i = 0; i < pByteCount; i++) {
+    for (uint16_t i = 0; i < fBlockLength; i++) {
         pOutput[i] = spi_readByte();
     }
 
@@ -169,5 +169,22 @@ uint8_t sdmmc_readSector(uint32_t pSectorNum, char* pOutput, uint16_t pByteCount
     spi_readByte();
 
     CLEAR_CS();
+    return TRUE;
+}
+
+
+uint8_t sdmmc_changeBlockLength(uint16_t pLength) {
+    if (pLength == 0) {
+        pLength = SDMMC_SECTOR_SIZE;
+    }
+
+    SET_CS();
+    if (sdmmc_writeCommand(SDMMC_SET_BLOCKLEN, pLength, SDMMC_DEFAULT_CRC) != 0) {
+        CLEAR_CS();
+        return FALSE;
+    }
+
+    CLEAR_CS();
+    fBlockLength = pLength;
     return TRUE;
 }

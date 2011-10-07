@@ -25,7 +25,14 @@ Version 1.4 (11. September 2011):
 * Added a doxygen config file in order to create a documentation easily
 * Cleaned (i.e. fixed indentation etc.) and commented every part of the code
 
-Planned for Version 1.5:
+Version 1.5 (??. October 2011):
+* Added method to change block length of the SD card
+* Heavy improvements in the NoFS-initialization routine
+* Change to NoFS-structure: 4 bytes after the header are reserved for a 32bit
+integer which is used by the Logger to skip areas on the memory card which are
+sure to be filled with data
+* Removed unnecessary write operations (i.e. WRITE_AFTER_NTH_COMMAND)
+
+Planned for Version 1.6 (probably coming November/December):
 * Support for switching UART-frequency in the GPS-library in order to support
   higher output frequencies (i.e. 4 Hz and above)
-* Improve NoFS handling

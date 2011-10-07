@@ -46,7 +46,7 @@
     #define GPS_BAUDRATE 9600UL
 
     /**
-     * \brief Initializes the GPS-module
+     * \brief Initializes the GPS-module. Locks the processor in case of error
      *
      * The parameters can be used to configure the output produced by the GPS.
      * Please note that certain limitations exist for the parameters values.
@@ -60,9 +60,8 @@
      * using the OR-operator on the constant values. Possible constant values
      * are {GPS_NMEA_GGA, GPS_NMEA_RMC, GPS_NMEA_GSA, GPS_NMEA_GSV,
      * GPS_NMEA_GLL, GPS_NMEA_VTG, GPS_NMEA_ZDA}.
-     * \return TRUE if initialization succeeded, FALSE otherwise
      */
-    uint8_t gps_init(uint8_t pFrequency, uint8_t pMessages);
+    void gps_init(uint8_t pFrequency, uint8_t pMessages);
 
     /** 
      * \brief Sets a parameter of the GPS-module to a given value
