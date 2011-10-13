@@ -2,6 +2,15 @@
  * \file gps.h
  * \brief Library for handling the GPS-module
  * \author Martin Matysiak
+ *
+ * Please note that by default, the GPS-ST22 modules *do not* have a flash
+ * chip installed. Commands which are written into the flash memory therefore
+ * have no effect.
+ *
+ * Further information regarding the module and its chipset can be found here:
+ * - http://www.perthold.de/BINARY/gps-st22.pdf
+ * - http://www.perthold.de/BINARY/AN0003_Binary_Messages_SkyTraq_Venus6.pdf
+ *
  */
 
 #ifndef GPS_H
