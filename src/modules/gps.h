@@ -54,6 +54,9 @@
     /// BAUD-Rate of the serial interface to the GPS module
     #define GPS_BAUDRATE 9600UL
 
+    /// BAUD-Rate of the serial interface when in highspeed mode
+    #define GPS_BAUDRATE_HIGHSPEED 57600UL
+
     /**
      * \brief Initializes the GPS-module. Locks the processor in case of error
      *
@@ -71,6 +74,12 @@
      * GPS_NMEA_GLL, GPS_NMEA_VTG, GPS_NMEA_ZDA}.
      */
     void gps_init(uint8_t pFrequency, uint8_t pMessages);
+
+    /**
+     * \brief Prompts the GPS to send data with a higher baudrate and
+     * reinitializes the UART port.
+     */
+    void gps_highspeed();
 
     /** 
      * \brief Sets a parameter of the GPS-module to a given value

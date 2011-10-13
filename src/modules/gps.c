@@ -13,6 +13,12 @@ void gps_init(uint8_t pFrequency, uint8_t pMessages) {
     UART_CALCULATE_BAUD(F_CPU, GPS_BAUDRATE));
 
     _delay_ms(100);
+    
+    // The datasheet recommends a higher baudrate for frequencies
+    // above or equal 4 Hz
+    if (pFrequency >= 4) {
+        gps_highspeed();
+    }
 
     // perform basic configuration using the given parameters
     unsigned char commands[8] = {
@@ -36,14 +42,17 @@ void gps_init(uint8_t pFrequency, uint8_t pMessages) {
     gps_setParam(GPS_SET_UPDATE_RATE, rate, 2);
 
     _delay_ms(50);
+}
 
-    unsigned char pps[2] = {
-        0x01,  // 1PPS on 3D Fix
-        0x00}; // In SRAM
+void gps_highspeed() {
+    // prompt gps to change baudrate
+    unsigned char baudrate[3] = {
+        0x00,  // COM1
+        0x04,  // 57600 baud
+        0x00}; // in SRAM
 
-    gps_setParam(GPS_SET_1PPS, pps, 2);
-
-    _delay_ms(50);
+    // change internal baudrate
+    uart_changeBaud(UART_CALCULATE_BAUD(F_CPU, GPS_BAUDRATE_HIGHSPEED));
 }
 
 unsigned char gps_calculateCS(const unsigned char* pPayload, uint16_t pLength) {
