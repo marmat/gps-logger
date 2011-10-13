@@ -33,6 +33,10 @@ void uart_init(uint8_t pConfig, uint16_t pUbr) {
     UCSR0C = pConfig;
 }
 
+void uart_changeBaud(uint16_t pUbr) {
+    // TODO
+}
+
 unsigned char uart_getChar() {
     if (uart_inputBuf0Read != uart_inputBuf0Write) {
         // increment reading pointer while catching a possible array overflow

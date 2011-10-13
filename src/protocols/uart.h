@@ -52,6 +52,13 @@
     void uart_init(uint8_t pConfig, uint16_t pUbr);
 
     /**
+     * \brief Reinitializes the UART-port with a new Baudrate
+     *
+     * \param pUbr A 16-bit integer containing the new baudrate configuration value
+     */
+    void uart_changeBaud(uint16_t pUbr);
+
+    /**
      * \brief Takes a character from the input buffer and returns it (FIFO).
      * \return The first not yet processed byte
      */
