@@ -37,15 +37,6 @@ int main (void) {
 
     _delay_ms(100);
 
-
- #define GPS_NMEA_GGA 0b00000010 // Note: bit 0 can't be used, is an indicator
-    #define GPS_NMEA_GSA 0b00000100 // for validity of the message
-    #define GPS_NMEA_GSV 0b00001000
-    #define GPS_NMEA_GLL 0b00010000
-    #define GPS_NMEA_RMC 0b00100000
-    #define GPS_NMEA_VTG 0b01000000
-    #define GPS_NMEA_ZDA 0b10000000
-
     // Initialize the necessary modules (these methods may lock the processor
     // in an endless loop if an error occurs!)
     nofs_init();
