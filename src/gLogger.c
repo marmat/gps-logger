@@ -38,10 +38,10 @@ int main (void) {
     // Initialize the necessary modules (these methods may lock the processor
     // in an endless loop if an error occurs!)
     nofs_init();
-    gps_init(1, GPS_NMEA_GGA | GPS_NMEA_RMC); // 1 stands for 1 Hz
+    gps_init(10, 0xFF); // 1 stands for 1 Hz
 
     // Write a short information string containing the firmware version (NMEA compliant)
-    nofs_writeString("\r\n$PGLGVER,1.5\r\n");
+    nofs_writeString("\r\n$PGLGVER,1.6a1\r\n");
 
     LEDCODE_OFF();
 
@@ -49,14 +49,13 @@ int main (void) {
 
     while(1) {
         // We'll write the data only if it contains a valid position
-        if (gps_getNMEA(nmeaBuf, 128) & GPS_NMEA_VALID) {
+        if (gps_getNMEA(nmeaBuf, 128)) {
             nofs_writeString(nmeaBuf);
         }
 
         // Flash !!! (the most important part of the code)
         LEDCODE_BLINK();
-        _delay_ms(30);
-        LEDCODE_BLINK(); 
+        
         sleep_mode();
     }
 
