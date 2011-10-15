@@ -27,6 +27,7 @@
     #define GPS_GET_DATE 0x2D
     #define GPS_GET_1PPS 0x3F
 
+    #define GPS_SET_BAUDRATE 0x05
     #define GPS_SET_NMEA 0x08
     #define GPS_SET_POWER 0x0C
     #define GPS_SET_UPDATE_RATE 0x0E
@@ -55,7 +56,7 @@
     #define GPS_BAUDRATE 9600UL
 
     /// BAUD-Rate of the serial interface when in highspeed mode
-    #define GPS_BAUDRATE_HIGHSPEED 57600UL
+    #define GPS_BAUDRATE_HIGHSPEED 38400UL
 
     /**
      * \brief Initializes the GPS-module. Locks the processor in case of error

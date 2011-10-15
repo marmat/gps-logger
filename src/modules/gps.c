@@ -18,6 +18,7 @@ void gps_init(uint8_t pFrequency, uint8_t pMessages) {
     // above or equal 4 Hz
     if (pFrequency >= 4) {
         gps_highspeed();
+        _delay_ms(100);
     }
 
     // perform basic configuration using the given parameters
@@ -48,8 +49,10 @@ void gps_highspeed() {
     // prompt gps to change baudrate
     unsigned char baudrate[3] = {
         0x00,  // COM1
-        0x04,  // 57600 baud
+        0x03,  // 38400 baud
         0x00}; // in SRAM
+
+    gps_setParam(GPS_SET_BAUDRATE, baudrate, 3);
 
     // change internal baudrate
     uart_changeBaud(UART_CALCULATE_BAUD(F_CPU, GPS_BAUDRATE_HIGHSPEED));
