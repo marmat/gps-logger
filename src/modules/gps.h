@@ -2,6 +2,15 @@
  * \file gps.h
  * \brief Library for handling the GPS-module
  * \author Martin Matysiak
+ *
+ * Please note that by default, the GPS-ST22 modules *do not* have a flash
+ * chip installed. Commands which are written into the flash memory therefore
+ * have no effect.
+ *
+ * Further information regarding the module and its chipset can be found here:
+ * - http://www.perthold.de/BINARY/gps-st22.pdf
+ * - http://www.perthold.de/BINARY/AN0003_Binary_Messages_SkyTraq_Venus6.pdf
+ *
  */
 
 #ifndef GPS_H
@@ -18,6 +27,7 @@
     #define GPS_GET_DATE 0x2D
     #define GPS_GET_1PPS 0x3F
 
+    #define GPS_SET_BAUDRATE 0x05
     #define GPS_SET_NMEA 0x08
     #define GPS_SET_POWER 0x0C
     #define GPS_SET_UPDATE_RATE 0x0E
@@ -28,13 +38,13 @@
     #define GPS_NMEA_INVALID 0x00
 
     // Possible NMEA-Messages that may be returned
-    #define GPS_NMEA_GGA 0b00000010 // Note: bit 0 can't be used, is an indicator
-    #define GPS_NMEA_GSA 0b00000100 // for validity of the message
-    #define GPS_NMEA_GSV 0b00001000
-    #define GPS_NMEA_GLL 0b00010000
-    #define GPS_NMEA_RMC 0b00100000
-    #define GPS_NMEA_VTG 0b01000000
-    #define GPS_NMEA_ZDA 0b10000000
+    #define GPS_NMEA_GGA 0x02 // 0b00000010 // Note: bit 0 can't be used, is an indicator
+    #define GPS_NMEA_GSA 0x04 // 0b00000100 // for validity of the message
+    #define GPS_NMEA_GSV 0x08 // 0b00001000
+    #define GPS_NMEA_GLL 0x10 // 0b00010000
+    #define GPS_NMEA_RMC 0x20 // 0b00100000
+    #define GPS_NMEA_VTG 0x40 // 0b01000000
+    #define GPS_NMEA_ZDA 0x80 // 0b10000000
 
     /// The value which is returned when no known NMEA-command has been recognized
     #define GPS_NMEA_UNKNOWN 0
@@ -44,6 +54,9 @@
 
     /// BAUD-Rate of the serial interface to the GPS module
     #define GPS_BAUDRATE 9600UL
+
+    /// BAUD-Rate of the serial interface when in highspeed mode
+    #define GPS_BAUDRATE_HIGHSPEED 38400UL
 
     /**
      * \brief Initializes the GPS-module. Locks the processor in case of error
@@ -62,6 +75,12 @@
      * GPS_NMEA_GLL, GPS_NMEA_VTG, GPS_NMEA_ZDA}.
      */
     void gps_init(uint8_t pFrequency, uint8_t pMessages);
+
+    /**
+     * \brief Prompts the GPS to send data with a higher baudrate and
+     * reinitializes the UART port.
+     */
+    void gps_highspeed();
 
     /** 
      * \brief Sets a parameter of the GPS-module to a given value

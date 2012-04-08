@@ -105,6 +105,12 @@ void nofs_writeString(char* pString) {
     }
 
     // Set the new end of data
+    if (fCurrentByte == NOFS_BUFFER_SIZE) {
+        nofs_flush();
+        fCurrentSector++;
+        fCurrentByte = 0;
+    }
+
     sectorBuf[fCurrentByte] = ETX;
 }
 

@@ -33,6 +33,28 @@ void uart_init(uint8_t pConfig, uint16_t pUbr) {
     UCSR0C = pConfig;
 }
 
+void uart_changeBaud(uint16_t pUbr) {
+
+    // we delay the baudrate change until the output buffer is empty
+    while (uart_outputBuf0Read != uart_outputBuf0Write) {
+        // wait, buffer contains some data
+        LEDCODE_BLINK();
+        _delay_ms(50);
+    }
+
+    // disable UART port
+    UCSR0B &=~((1 << RXEN0) | (1 << TXEN0));
+
+    _delay_ms(100);
+
+    // write new baudrate
+    UBRR0H = (uint8_t)(pUbr >> 8);
+    UBRR0L = (uint8_t)pUbr;
+
+    // re-enable UART port
+    UCSR0B |= (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0);
+}
+
 unsigned char uart_getChar() {
     if (uart_inputBuf0Read != uart_inputBuf0Write) {
         // increment reading pointer while catching a possible array overflow
