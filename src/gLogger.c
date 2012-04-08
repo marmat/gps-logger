@@ -11,7 +11,7 @@
 #include "modules/gps.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-// Change these constans in order to alter the logging behaviour
+// Change these constants in order to alter the logging behaviour
 
 /**
  * Indicates how many message packets per second shall be recorded 
@@ -24,6 +24,7 @@
  * Valid values for the ST22 are:
  * [GPS_NMEA_GGA, GPS_NMEA_GSA, GPS_NMEA_GSV, GPS_NMEA_GLL, GPS_NMEA_RMC,
  *  GPS_NMEA_VTG, GPS_NMEA_ZDA]
+ * Several message types can be combined using ORs.
  */
 #define MESSAGES GPS_NMEA_GGA | GPS_NMEA_RMC | GPS_NMEA_VTG
 
@@ -81,6 +82,7 @@ int main (void) {
             nofs_writeString(nmeaBuf);
         }
 
+        // Makes sure that the LED is blinking only roughly once a second
         if (++messageCount == LED_THRESHOLD) {
             // Flash !!! (the most important part of the code)
             LEDCODE_BLINK();
