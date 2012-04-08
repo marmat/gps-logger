@@ -33,6 +33,6 @@ integer which is used by the Logger to skip areas on the memory card which are
 sure to be filled with data
 * Removed unnecessary write operations (i.e. WRITE_AFTER_NTH_COMMAND)
 
-Planned for Version 1.6 (probably coming November/December):
+Version 1.6 (08. April 2012):
 * Support for switching UART-frequency in the GPS-library in order to support
   higher output frequencies (i.e. 4 Hz and above)
